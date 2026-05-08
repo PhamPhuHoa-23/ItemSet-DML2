@@ -8,6 +8,8 @@ data/benchmark/kosarak.dat
 tools/
 
 # ── Julia ─────────────────────────────────────────────────────────────────
+# Manifest.toml is machine-generated; regenerate with: julia --project=. -e "using Pkg; Pkg.instantiate()"
+Manifest.toml
 .julia/
 *.jl.cov
 *.jl.*.cov
