@@ -34,7 +34,8 @@ spmf_toy.txt
 notebooks/_*.jl
 notebooks/_*.txt
 
-# ── LaTeX build artifacts ─────────────────────────────────────────────────
+# ── LaTeX source and build artifacts ─────────────────────────────────────
+docs/LaTeX/
 docs/LaTeX/*.aux
 docs/LaTeX/*.log
 docs/LaTeX/*.out
