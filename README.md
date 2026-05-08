@@ -62,10 +62,10 @@ Output format: `1 3 5 #SUP: 42`
 ## Tests
 
 ```bash
-julia --project=. tests/test_correctness.jl
+julia --project test/runtests.jl
 ```
 
-18/18 pass, kết quả khớp 100% SPMF trên tất cả datasets.
+22/22 pass, kết quả khớp 100% SPMF trên tất cả datasets.
 
 ## Thực nghiệm
 
