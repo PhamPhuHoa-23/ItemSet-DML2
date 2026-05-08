@@ -60,7 +60,7 @@ function _backtrack_bit!(
         support_Pe = count(tidset_Pe)
         support_Pe < minsup && continue
 
-        p[plen + 1] = e
+        @inbounds p[plen + 1] = e
         push!(result, FreqItemset(sort(p[1:(plen + 1)]), support_Pe))
 
         items_after_e = freq_items[(j + 1):end]
