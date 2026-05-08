@@ -1,0 +1,10 @@
+# Item name mapping for sample_9tx.dat
+# Format: item_id -> name (used for human-readable output in report)
+# Dataset: 9 transactions, items 1-5
+# Source: Classic example from Tan, Steinbach & Kumar "Introduction to Data Mining"
+
+1 bread
+2 milk
+3 diaper
+4 beer
+5 eggs

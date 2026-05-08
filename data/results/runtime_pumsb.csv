@@ -1,0 +1,4 @@
+﻿minsup_frac,minsup_abs,itemset_count,julia_opt_ms,spmf_ms,baseline_ms
+0.95,46594,172,80.3,969.0,N/A
+0.90,44142,2607,150.2,10423.0,N/A
+0.85,41690,20527,249.1,85486.0,N/A

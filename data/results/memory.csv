@@ -1,0 +1,6 @@
+dataset,n_tx,minsup_frac,minsup_abs,opt_alloc_mib,base_alloc_mib
+Chess,3196,0.75,2397,31.87,857.23
+Mushroom,8124,0.3,2438,10.98,161.57
+Retail,88162,0.02,1764,20.68,N/A
+T10I4D100K,100000,0.008,800,1215.2,N/A
+Accidents,340183,0.8,272147,165.16,N/A
