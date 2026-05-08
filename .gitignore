@@ -1,0 +1,63 @@
+# ── Large benchmark datasets (>25 MB) ─────────────────────────────────────
+# Download links in README (Google Drive)
+data/benchmark/accidents.dat
+data/benchmark/kosarak.dat
+
+# ── SPMF binary tool (15.6 MB) ────────────────────────────────────────────
+# Download: https://www.philippe-fournier-viger.com/spmf/index.php?link=download.php
+tools/
+
+# ── Julia ─────────────────────────────────────────────────────────────────
+.julia/
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.ipynb_checkpoints/
+
+# ── Root-level scratch output files ───────────────────────────────────────
+chess_base_out.txt
+julia_base_toy.txt
+julia_chess.txt
+julia_opt_toy.txt
+retail_test.txt
+spmf_chess.txt
+spmf_toy.txt
+
+# ── Debug/temp files (underscore prefix) ──────────────────────────────────
+notebooks/_*.jl
+notebooks/_*.txt
+
+# ── LaTeX build artifacts ─────────────────────────────────────────────────
+docs/LaTeX/*.aux
+docs/LaTeX/*.log
+docs/LaTeX/*.out
+docs/LaTeX/*.toc
+docs/LaTeX/*.lof
+docs/LaTeX/*.lot
+docs/LaTeX/*.bbl
+docs/LaTeX/*.blg
+docs/LaTeX/*.glg
+docs/LaTeX/*.glo
+docs/LaTeX/*.gls
+docs/LaTeX/*.ist
+docs/LaTeX/*.acn
+docs/LaTeX/*.acr
+docs/LaTeX/*.alg
+docs/LaTeX/*.fdb_latexmk
+docs/LaTeX/*.fls
+docs/LaTeX/*.synctex.gz
+docs/LaTeX/*.xdy
+
+# ── SPMF / Java temp artifacts ────────────────────────────────────────────
+-
+ca/
+
+# ── OS ────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
