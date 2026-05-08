@@ -17,6 +17,47 @@ function normalize(result::Optimized.LCMFreqResult)
     sort!(pairs, by = x -> x[1])
 end
 
+# Ví dụ 1 (Chương 2): CSDL 5 giao dịch, I={A,B,C,D}={1,2,3,4}, sigma=2
+# Kỳ vọng: 15 itemsets (tất cả 2^4-1 tập con đều frequent)
+@testset "Chuong 2 Vi du 1 (5tx, ABCD, sigma=2)" begin
+    db = [
+        [1, 2, 3, 4],
+        [1, 2, 4],
+        [1, 2, 3],
+        [2, 3],
+        [1, 2, 3, 4],
+    ]
+    expected = sort([
+        ([1], 4), ([2], 5), ([3], 4), ([4], 3),
+        ([1, 2], 4), ([1, 3], 3), ([1, 4], 3), ([2, 3], 4), ([2, 4], 3), ([3, 4], 2),
+        ([1, 2, 3], 3), ([1, 2, 4], 3), ([1, 3, 4], 2), ([2, 3, 4], 2),
+        ([1, 2, 3, 4], 2),
+    ], by = x -> x[1])
+
+    @test normalize(lcmfreq_base(db, 2)) == expected
+    @test normalize(Optimized.lcmfreq(db, 2)) == expected
+end
+
+# Ví dụ 2 (Chương 2): item D={4} cô lập, không đồng xuất hiện với A,B,C
+# Kỳ vọng: 7 itemsets — cắt tỉa sớm khi giao tidset rỗng
+@testset "Chuong 2 Vi du 2 (6tx, D co lap, sigma=2)" begin
+    db = [
+        [1, 2, 3],
+        [1, 2],
+        [1, 3],
+        [2, 3],
+        [4],
+        [4],
+    ]
+    expected = sort([
+        ([1], 3), ([2], 3), ([3], 3), ([4], 2),
+        ([1, 2], 2), ([1, 3], 2), ([2, 3], 2),
+    ], by = x -> x[1])
+
+    @test normalize(lcmfreq_base(db, 2)) == expected
+    @test normalize(Optimized.lcmfreq(db, 2)) == expected
+end
+
 @testset "contextPasquier99 known answer" begin
     db = [
         [1, 3, 4],
