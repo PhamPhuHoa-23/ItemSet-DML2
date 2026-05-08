@@ -1,0 +1,1152 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============= PACKAGES =============
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T5]{fontenc}
+
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\setlist[enumerate]{itemsep=0pt, parsep=0pt, topsep=0pt, partopsep=0pt}
+\setlist[itemize]{itemsep=0pt, parsep=0pt, topsep=0pt, partopsep=0pt}
+
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{hyperref}
+\usepackage{url}
+
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{titlesec}
+\usepackage{pifont}
+\usepackage[acronym, toc, nonumberlist]{glossaries}
+\makeglossaries
+
+% ============= GLOSSARY =============
+\newglossaryentry{fer}{
+    name={FER},
+    description={Facial Expression Recognition -- Nhận dạng biểu cảm khuôn mặt}
+}
+\newacronym{au}{AU}{Action Unit}
+\newacronym{facs}{FACS}{Facial Action Coding System}
+
+% ============= COLOR DEFINITIONS =============
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{hcmublue}{RGB}{0,51,102}
+
+% ============= CUSTOM COMMANDS =============
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+% ============= CODE STYLE =============
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{codegray}
+}
+\lstset{style=pythonstyle}
+
+% ============= HYPERREF =============
+\hypersetup{
+    colorlinks=true,
+    linkcolor=hcmublue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=hcmublue,
+    pdftitle={Báo cáo Đồ án Môn học - Nhận dạng Biểu cảm Khuôn mặt},
+    pdfauthor={Nhóm sinh viên HCMUS},
+    bookmarksnumbered=true,
+    bookmarksopen=true
+}
+
+% ============= HEADER AND FOOTER =============
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Đồ án Môn học: Nhận dạng Biểu cảm Khuôn mặt}
+\fancyhead[R]{\small CSC14006}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% ============= SECTION FORMATTING =============
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{hcmublue}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{hcmublue}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{hcmublue}}
+  {\thesubsubsection}{1em}{}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\let\oldtextbf\textbf
+\renewcommand{\textbf}[1]{\oldtextbf{\textcolor{hcmublue}{#1}}}
+
+% ============= BEGIN DOCUMENT =============
+\begin{document}
+
+% ============= TITLE PAGE =============
+\begin{titlepage}
+    \centering
+    \vspace*{0.5cm}
+
+    {\Large \textbf{ĐẠI HỌC QUỐC GIA TP. HỒ CHÍ MINH}}\\[0.3cm]
+    {\Large \textbf{TRƯỜNG ĐẠI HỌC KHOA HỌC TỰ NHIÊN}}\\[0.3cm]
+    {\Large \textbf{KHOA CÔNG NGHỆ THÔNG TIN}}\\[1.5cm]
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.25\textwidth]{logo.png}
+    \end{figure}
+
+    \rule{\linewidth}{0.5mm}\\[0.4cm]
+    {\huge \textbf{BÁO CÁO ĐỒ ÁN MÔN HỌC}}\\[0.3cm]
+    {\LARGE \textbf{NHẬN DẠNG BIỂU CẢM KHUÔN MẶT}}\\[0.2cm]
+    {\large \textit{(Facial Expression Recognition)}}\\[0.4cm]
+    \rule{\linewidth}{0.5mm}\\[1.5cm]
+
+    \begin{tabular}{rl}
+        \textbf{Môn học:} & CSC14006 - Nhận dạng \\[0.2cm]
+        \textbf{Lớp:}     & % <-- ĐIỀN LỚP VÀO ĐÂY
+                            \\[0.2cm]
+        \textbf{GVHD:}    & ThS. Nguyễn Thanh Tình \\
+    \end{tabular}
+
+    \vfill
+
+    \begin{tabular}{r p{6cm} l}
+        \multicolumn{3}{l}{\textbf{\large Nhóm sinh viên thực hiện:}}\\[0.5cm]
+        1. & Thành viên A  & MSSV: XXXXXXXX \\  % <-- SỬA TÊN + MSSV
+        2. & Thành viên B  & MSSV: XXXXXXXX \\
+        3. & Thành viên C  & MSSV: XXXXXXXX \\
+        4. & Thành viên D  & MSSV: XXXXXXXX \\
+    \end{tabular}
+
+    \vfill
+
+    {\large Tp. Hồ Chí Minh, tháng 4 năm 2025}
+\end{titlepage}
+
+% ============= ABSTRACT =============
+\begin{abstract}
+Báo cáo này trình bày nghiên cứu về bài toán \textit{Nhận dạng Biểu cảm Khuôn mặt} (Facial Expression Recognition -- FER), một lĩnh vực quan trọng trong thị giác máy tính và giao tiếp người-máy. Phần lý thuyết tập trung phân tích Chapter 19 ``Facial Expression Recognition'' từ \textit{Handbook of Face Recognition} (2nd Edition) của Tian, Kanade và Cohn (2011), trình bày kiến trúc tổng quát của một hệ thống phân tích biểu cảm tự động (AFEA), bao gồm các giai đoạn thu nhận khuôn mặt, trích xuất đặc trưng và nhận dạng biểu cảm. Bài báo SOTA được chọn để đối chiếu là \textit{``Generalizable Facial Expression Recognition''} (CAFE, Zhang et al., 2024), đề xuất phương pháp học sigmoid mask trên các đặc trưng khuôn mặt tổng quát được trích xuất từ mô hình ngôn ngữ lớn CLIP, nhằm giải quyết bài toán zero-shot generalization -- một hạn chế căn bản mà các phương pháp truyền thống chưa đề cập. Thực nghiệm được tiến hành trên năm bộ dữ liệu khác nhau, cho thấy CAFE vượt trội các phương pháp SOTA hiện tại với biên độ lớn trên các test set có domain gap.
+
+\textbf{Từ khóa:} Facial Expression Recognition, Action Units, FACS, CLIP, Sigmoid Mask, Domain Generalization, Zero-shot Generalization, CAFE.
+\end{abstract}
+
+% ============= TABLE OF CONTENTS =============
+\newpage
+\tableofcontents
+\newpage
+\listoftables
+\listoffigures
+\newpage
+\printglossary[title={Danh sách Thuật ngữ}, toctitle={Danh sách Thuật ngữ}]
+\printglossary[type=\acronymtype, title={Danh sách Viết tắt}]
+\newpage
+
+% ============= SECTION 1: THÔNG TIN NHÓM =============
+\section{THÔNG TIN NHÓM VÀ PHÂN CÔNG CÔNG VIỆC}
+
+\subsection{Thông tin các thành viên}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|l|l|l|}
+\hline
+\textbf{MSSV} & \textbf{Họ và Tên} & \textbf{Email} & \textbf{Vai trò} \\ \hline
+23122030 & Phạm Phú Hòa    & 23122030@student.hcmus.edu.vn & Nhóm trưởng \\ \hline
+23122039 & Huỳnh Trung Kiệt & 23122039@student.hcmus.edu.vn & Thành viên \\ \hline
+23122041 & Đào Sỹ Duy Minh  & 23122041@student.hcmus.edu.vn & Thành viên \\ \hline
+23122044 & Trần Chí Nguyên  & 23122044@student.hcmus.edu.vn & Thành viên \\ \hline
+\end{tabular}
+\caption{Thông tin các thành viên nhóm}
+\label{tab:team_info}
+\end{table}
+
+\subsection{Phân công công việc chi tiết}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|X|c|}
+\hline
+\textbf{Thành viên} & \textbf{Công việc được giao} & \textbf{Hoàn thành} \\ \hline
+
+\textbf{Phạm Phú Hòa} &
+\begin{minipage}[t]{\linewidth}
+\begin{itemize}[leftmargin=*,nosep,after=\strut]
+    \item[-] Nghiên cứu và trình bày Chapter 19 (FACS, AFEA pipeline, feature extraction)
+    \item[-] Viết báo cáo phần lý thuyết chương sách (Mục 2)
+    \item[-] Phân tích mối liên hệ kỹ thuật giữa chương sách và bài báo SOTA
+\end{itemize}
+\end{minipage} & 100\% \\ \hline
+
+\textbf{Huỳnh Trung Kiệt} &
+\begin{minipage}[t]{\linewidth}
+\begin{itemize}[leftmargin=*,nosep,after=\strut]
+    \item[-] Nghiên cứu bài báo CAFE (Zhang et al., 2024)
+    \item[-] Viết báo cáo phần SOTA (Mục 3): phân tích kiến trúc, loss function, thực nghiệm
+    \item[-] Tổng hợp lịch sử phát triển FER (Mục 3 -- bridge section)
+\end{itemize}
+\end{minipage} & 100\% \\ \hline
+
+\textbf{Đào Sỹ Duy Minh} &
+\begin{minipage}[t]{\linewidth}
+\begin{itemize}[leftmargin=*,nosep,after=\strut]
+    \item[-] Cài đặt và chạy mã nguồn gốc của bài báo CAFE
+    \item[-] Phân tích mã nguồn theo từng thành phần kỹ thuật
+    \item[-] Viết báo cáo phần thực hành -- phân tích mã nguồn và thực nghiệm (Mục 4)
+\end{itemize}
+\end{minipage} & 100\% \\ \hline
+
+\textbf{Trần Chí Nguyên} &
+\begin{minipage}[t]{\linewidth}
+\begin{itemize}[leftmargin=*,nosep,after=\strut]
+    \item[-] Xây dựng demo minh họa FER (webcam real-time)
+    \item[-] Đánh giá, so sánh kết quả thực nghiệm với bài báo
+    \item[-] Hoàn thiện báo cáo, formatting và chuẩn bị slide
+\end{itemize}
+\end{minipage} & 100\% \\ \hline
+
+\end{tabularx}
+\caption{Bảng phân công công việc chi tiết}
+\label{tab:work_distribution}
+\end{table}
+
+\subsection{Tự đánh giá mức độ hoàn thành}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|p{9cm}|c|}
+\hline
+\textbf{STT} & \textbf{Yêu cầu} & \textbf{Hoàn thành} \\ \hline
+1 & Nghiên cứu và trình bày chương sách (Chapter 19) & \cmark \\ \hline
+2 & Nghiên cứu bài báo SOTA (CAFE, 2024) & \cmark \\ \hline
+3 & Phân tích mối liên hệ kỹ thuật giữa chương sách và bài báo & \cmark \\ \hline
+4 & Đánh giá điểm mạnh, hạn chế và đề xuất cải tiến & \cmark \\ \hline
+5 & Demo minh họa FER & \cmark \\ \hline
+6 & Phân tích mã nguồn bài báo & \cmark \\ \hline
+7 & Chạy thực nghiệm và so sánh kết quả & \cmark \\ \hline
+8 & Báo cáo chi tiết và slide trình bày & \cmark \\ \hline
+\end{tabular}
+\caption{Bảng tự đánh giá yêu cầu đồ án}
+\label{tab:self_eval}
+\end{table}
+
+
+% ============= SECTION 2: PHẦN LÝ THUYẾT - CHƯƠNG SÁCH =============
+\section{PHẦN LÝ THUYẾT}
+
+\subsection{Nghiên cứu chương sách: Chapter 19 -- Facial Expression Recognition}
+
+\subsubsection{Giới thiệu chương}
+
+\textbf{Nguồn tài liệu.} Chương 19 \gls{fer}---``Facial Expression Recognition'' nằm trong cuốn \textit{Handbook of Face Recognition} (2nd Edition, Springer, 2011), được biên soạn bởi Yingli Tian (The City College of New York), Takeo Kanade (Carnegie Mellon University) và Jeffrey F. Cohn (University of Pittsburgh) -- ba nhà nghiên cứu hàng đầu trong lĩnh vực phân tích biểu cảm khuôn mặt tự động. Đây là một trong những chương tổng quan toàn diện và có ảnh hưởng nhất về chủ đề này tính đến năm 2011.
+
+\textbf{Định nghĩa Nhận dạng Biểu cảm Khuôn mặt theo sách.}
+Theo chương sách, \textit{facial expression analysis} (phân tích biểu cảm khuôn mặt) được định nghĩa là:
+
+\begin{quote}
+\textit{``...computer systems that attempt to automatically analyze and recognize facial motions and facial feature changes from visual information.''}
+\end{quote}
+
+Cần phân biệt rõ khái niệm này với \textit{emotion analysis} (phân tích cảm xúc): biểu cảm khuôn mặt là tín hiệu \textit{thấp hơn} và \textit{trung lập về ngữ nghĩa hơn}, nó phản ánh không chỉ cảm xúc mà còn ý định, quá trình nhận thức, nỗ lực thể chất và ý nghĩa giao tiếp liên cá nhân khác. Ví dụ, một nụ cười (AU12) có thể biểu thị niềm vui, nhưng cũng có thể là lịch sự xã giao hoặc che giấu cảm xúc thật. Phân tích cảm xúc đòi hỏi tri thức ở mức cao hơn, bao gồm ngữ cảnh, giọng nói, cử chỉ cơ thể và các yếu tố văn hóa -- những thứ mà một hệ thống AFEA thuần túy không đảm nhiệm. Chương sách nhấn mạnh rằng hệ thống FER phải \textit{``analyze the facial actions regardless of context, culture, gender, and so on''} -- tức là hoạt động độc lập với các yếu tố ngoại cảnh.
+
+\textbf{Phạm vi và cấu trúc của chương.} Chương 19 tổ chức nội dung xung quanh bốn vấn đề kỹ thuật chính:
+\begin{enumerate}
+    \item \textbf{Face Acquisition} -- Thu nhận và định vị khuôn mặt trong ảnh/video
+    \item \textbf{Facial Feature Extraction and Representation} -- Trích xuất và biểu diễn đặc trưng khuôn mặt
+    \item \textbf{Facial Expression Recognition} -- Nhận dạng biểu cảm từ các đặc trưng
+    \item \textbf{Multimodal Expression Analysis} -- Phân tích biểu cảm kết hợp đa phương thức
+\end{enumerate}
+
+Ngoài ra, chương còn cung cấp phân tích không gian vấn đề (Problem Space) với 10 chiều thách thức, tổng hợp các database chuẩn, và 7 câu hỏi mở định hướng cho nghiên cứu tương lai. Phần tiếp theo sẽ trình bày chi tiết từng nội dung này.
+
+\subsubsection{Kiến trúc tổng quát của hệ thống AFEA}
+
+Một hệ thống phân tích biểu cảm khuôn mặt tự động (Automatic Facial Expression Analysis -- AFEA) hoàn chỉnh được cấu thành từ ba giai đoạn tuần tự, như minh họa trong Hình \ref{fig:afea_pipeline}:
+
+\begin{figure}[H]
+    \centering
+    % TODO: Vẽ sơ đồ pipeline 3 bước: [Face Acquisition] -> [Feature Extraction] -> [Expression Recognition]
+    % Gợi ý: dạng flowchart ngang, mỗi bước là 1 box với mũi tên kết nối
+    % Có thể thêm input (ảnh/video khuôn mặt) ở đầu và output (AU / emotion label) ở cuối
+    \includegraphics[width=0.85\textwidth]{fig_afea_pipeline.png}
+    \caption{Kiến trúc tổng quát của hệ thống phân tích biểu cảm khuôn mặt tự động (AFEA). Nguồn: Tian et al. (2011).}
+    \label{fig:afea_pipeline}
+\end{figure}
+
+\textbf{Giai đoạn 1 -- Face Acquisition (Thu nhận khuôn mặt).}
+Đây là giai đoạn đầu vào, có nhiệm vụ tự động tìm và định vị vùng khuôn mặt trong ảnh hoặc chuỗi video. Có hai chiến lược chính:
+\begin{itemize}
+    \item \textbf{Per-frame detection:} Phát hiện khuôn mặt ở từng frame một, phù hợp khi không có giả định về chuyển động đầu. Viola-Jones detector \cite{viola2001} là phương pháp phổ biến nhất giai đoạn này, có khả năng phát hiện real-time.
+    \item \textbf{Track-from-first-frame:} Chỉ phát hiện khuôn mặt ở frame đầu tiên (giả sử frontal, expressionless), sau đó dùng tracking cho các frame tiếp theo. Cách này tiết kiệm chi phí tính toán nhưng dễ bị trượt khi có chuyển động đầu lớn.
+\end{itemize}
+Với chuyển động đầu lớn ngoài mặt phẳng (out-of-plane rotation), cần bổ sung thêm bước \textbf{head pose estimation} để ổn định khuôn mặt trước khi trích xuất đặc trưng.
+
+\textbf{Giai đoạn 2 -- Facial Feature Extraction and Representation (Trích xuất đặc trưng).}
+Sau khi khuôn mặt được định vị, hệ thống phân tích những thay đổi trên khuôn mặt gây ra bởi biểu cảm. Chương sách xác định hai nhóm đặc trưng chính: (1) \textbf{geometric features} mô tả hình dạng và vị trí của các thành phần khuôn mặt, và (2) \textbf{appearance features} mô tả sự thay đổi kết cấu da (texture). Hai nhóm này sẽ được phân tích chi tiết trong Mục \ref{subsec:feature_extraction}.
+
+\textbf{Giai đoạn 3 -- Facial Expression Recognition (Nhận dạng biểu cảm).}
+Đây là bước quyết định, phân loại biểu cảm từ vector đặc trưng đã trích xuất. Tùy thuộc vào mục tiêu đầu ra, hệ thống có thể nhận dạng ở hai mức:
+\begin{itemize}
+    \item \textbf{Action Unit level:} Nhận dạng các AU cụ thể và tổ hợp của chúng -- mức mô tả chi tiết nhất, phù hợp với các ứng dụng y tế, phân tích tâm lý.
+    \item \textbf{Emotion label level:} Phân loại trực tiếp thành 6 biểu cảm cảm xúc cơ bản (disgust, fear, joy, surprise, sadness, anger) -- thô hơn nhưng trực quan hơn, phù hợp với HCI.
+\end{itemize}
+
+Tùy theo cách xử lý thông tin thời gian, chương phân loại các phương pháp recognition thành \textbf{frame-based} (phân tích từng ảnh độc lập) và \textbf{sequence-based} (khai thác dynamics thời gian của chuỗi frames).
+
+\subsubsection{Hệ thống FACS và Action Units}
+
+\textbf{Nền tảng tâm lý học.} Nghiên cứu biểu cảm khuôn mặt có lịch sử từ năm 1872 khi Darwin xuất bản \textit{The Expression of the Emotions in Man and Animals}. Đến những năm 1970, Paul Ekman và Wallace Friesen đề xuất luận điểm về tính phổ quát của biểu cảm cảm xúc: có 6 cảm xúc cơ bản (disgust, fear, joy, surprise, sadness, anger) được biểu hiện thông qua cùng một tập biểu cảm khuôn mặt trên toàn thế giới, bất kể văn hóa (Hình \ref{fig:six_expressions}).
+
+\begin{figure}[H]
+    \centering
+    % TODO: 6 ảnh minh họa 6 biểu cảm cơ bản (posed images từ database)
+    % Gợi ý: 1 hàng 6 ảnh, hoặc 2 hàng 3 ảnh
+    % Label từ trái sang: disgust, fear, joy, surprise, sadness, anger
+    \includegraphics[width=0.9\textwidth]{fig_six_expressions.png}
+    \caption{Sáu biểu cảm cảm xúc cơ bản: (1) disgust -- ghê tởm, (2) fear -- sợ hãi, (3) joy -- vui mừng, (4) surprise -- ngạc nhiên, (5) sadness -- buồn bã, (6) anger -- tức giận. Nguồn: posed images từ Cohn-Kanade database \cite{kanade2000}.}
+    \label{fig:six_expressions}
+\end{figure}
+
+Tuy nhiên trong thực tế đời thường, các biểu cảm nguyên mẫu (prototypic expressions) này xuất hiện \textit{tương đối hiếm}. Thay vào đó, cảm xúc thường được truyền đạt qua những thay đổi tinh tế ở một vài đặc trưng riêng lẻ -- ví dụ môi khép chặt thể hiện giận dữ nhẹ, hay góc miệng cụp xuống thể hiện buồn bã. Để nắm bắt được sự tinh tế này, Ekman và Friesen (1978) phát triển \textbf{Facial Action Coding System (FACS)}.
+
+\textbf{Định nghĩa và cấu trúc FACS.}
+FACS là hệ thống mô tả \textit{tất cả các thay đổi có thể quan sát được trên khuôn mặt} thông qua các \textbf{Action Units (AU)} -- mỗi AU tương ứng với sự co của một hoặc một nhóm cơ mặt cụ thể. Đây là hệ thống dựa trên quan sát của con người (human-observer-based): các FACS coder được huấn luyện xem video chậm và ghi nhận tất cả các AU xuất hiện. FACS không mang tính suy diễn -- nó hoàn toàn mô tả, không gán nhãn cảm xúc.
+
+FACS bao gồm \textbf{44 AU}, chia thành hai nhóm:
+
+\begin{itemize}
+    \item \textbf{30 AU giải phẫu học (anatomically-based):} Mỗi AU liên kết với sự co của cơ mặt cụ thể. Ví dụ quan trọng:
+    \begin{itemize}
+        \item \textbf{AU1} -- Inner Brow Raise: Nâng phần trong của lông mày (cơ frontalis, pars medialis)
+        \item \textbf{AU4} -- Brow Lowerer: Cau lông mày (cơ corrugator supercilii)
+        \item \textbf{AU6} -- Cheek Raiser: Nâng gò má (cơ orbicularis oculi, pars orbitalis)
+        \item \textbf{AU12} -- Lip Corner Puller: Kéo góc môi lên -- tạo nụ cười (cơ zygomaticus major)
+        \item \textbf{AU17} -- Chin Raiser: Nâng cằm (cơ mentalis)
+        \item \textbf{AU25} -- Lips Part: Mở môi (cơ depressor labii)
+    \end{itemize}
+    \item \textbf{14 AU miscellaneous:} Không xác định cơ cụ thể, ví dụ AU19 (Tongue Show -- thè lưỡi), AU29 (Jaw Thrust -- đẩy hàm về phía trước).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % TODO: Ảnh minh họa một số AU quan trọng
+    % Gợi ý: Grid 2x3 hoặc 3x3, mỗi ô là 1 AU với tên và ví dụ ảnh khuôn mặt
+    % Có thể highlight vùng cơ mặt tương ứng bằng overlay màu
+    \includegraphics[width=0.8\textwidth]{fig_action_units.png}
+    \caption{Minh họa một số Action Units (AU) quan trọng trong hệ thống FACS: AU1 (Inner Brow Raise), AU4 (Brow Lowerer), AU6 (Cheek Raiser), AU12 (Lip Corner Puller), AU17 (Chin Raiser), AU25 (Lips Part).}
+    \label{fig:action_units}
+\end{figure}
+
+\textbf{Cường độ và tổ hợp AU.}
+Các AU có cường độ biến đổi, được đánh giá theo \textbf{thang 5 điểm} từ A (trace -- vết mờ) đến E (extreme -- cực mạnh). Điều này quan trọng vì một nụ cười cường độ A và cường độ E mang ý nghĩa hoàn toàn khác nhau về mặt xã hội.
+
+Trong thực tế, các AU \textit{thường xuất hiện kết hợp} với nhau. Chương sách phân biệt hai loại tổ hợp:
+
+\begin{itemize}
+    \item \textbf{Additive combinations (tổ hợp cộng tính):} Các AU kết hợp mà không ảnh hưởng lẫn nhau, ngoại hình là tổng của từng AU riêng lẻ. Ví dụ điển hình: nụ cười mở miệng là AU12 (kéo góc môi lên) kết hợp với AU25 hoặc AU26 hoặc AU27 (các mức mở miệng tăng dần từ mở môi đến hạ hàm hoàn toàn).
+
+    \item \textbf{Non-additive combinations / Co-articulation effects (tổ hợp phi cộng tính):} Các AU tương tác và ảnh hưởng đến ngoại hình của nhau, kết quả không thể dự đoán đơn giản bằng cách cộng từng AU. Ví dụ: AU12 (kéo góc môi lên) kết hợp với AU15 (kéo góc môi xuống) -- thường xuất hiện khi ngượng ngùng (embarrassment). Hành động của AU15 \textit{điều chỉnh} hành động của AU12 lên góc môi, tạo ra sự thay đổi ngoại hình phức tạp phụ thuộc vào thứ tự và thời điểm xuất hiện của từng AU.
+\end{itemize}
+
+Bảng \ref{tab:au_combinations} minh họa một số tổ hợp AU điển hình và biểu cảm cảm xúc tương ứng (theo EMFACS, hệ thống bổ sung cho FACS).
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Biểu cảm} & \textbf{Tổ hợp AU} & \textbf{Mô tả} \\ \hline
+Joy (vui mừng)     & AU6 + AU12           & Nâng gò má + kéo góc môi lên (``Duchenne smile'') \\ \hline
+Anger (tức giận)   & AU4 + AU5 + AU7 + AU23 + AU24 & Cau mày + mở to mắt + khép môi \\ \hline
+Surprise (ngạc nhiên) & AU1 + AU2 + AU5 + AU26 & Nâng lông mày + mở to mắt + mở miệng \\ \hline
+Sadness (buồn bã)  & AU1 + AU4 + AU15 + AU17 & Nâng trong lông mày + cụp góc môi \\ \hline
+Disgust (ghê tởm)  & AU9 + AU15 + AU16 & Nhăn mũi + cụp góc môi \\ \hline
+Fear (sợ hãi)      & AU1 + AU2 + AU4 + AU5 + AU7 + AU20 + AU26 & Lông mày nâng + căng miệng ngang \\ \hline
+\end{tabular}
+\caption{Tổ hợp Action Units đặc trưng cho 6 biểu cảm cảm xúc cơ bản (theo EMFACS)}
+\label{tab:au_combinations}
+\end{table}
+
+\textbf{Ý nghĩa đối với hệ thống tự động.}
+Chương sách nhấn mạnh rằng một hệ thống FER hoàn chỉnh cần xử lý được \textit{cả AU đơn lẻ lẫn tổ hợp}, đặc biệt là tổ hợp phi cộng tính. Có hơn 7000 tổ hợp AU khác nhau được quan sát trong thực tế -- đây là thách thức không gian lớn đối với bất kỳ bộ phân loại nào. Một classifier chỉ được huấn luyện trên AU đơn lẻ sẽ thất bại với các tổ hợp có co-articulation effect.
+
+\subsubsection{Không gian vấn đề (Problem Space)}
+
+Chương sách xác định bài toán FER không phải là một chiều duy nhất mà là một \textbf{không gian đa chiều} với 10 nhân tố phức tạp. Mỗi nhân tố đặt ra thách thức riêng và một hệ thống AFEA lý tưởng phải giải quyết được tất cả. Đây là phần quan trọng cho thấy tại sao FER là bài toán khó và vẫn còn nhiều thách thức đến tận ngày nay.
+
+\textbf{(1) Mức độ mô tả (Level of Description).}
+Có hai cực trong việc mô tả biểu cảm: (a) nhận dạng 6 cảm xúc nguyên mẫu của Ekman (disgust, fear, joy, surprise, sadness, anger) -- coarse-grained; và (b) nhận dạng từng Action Unit và tổ hợp -- fine-grained. Hầu hết hệ thống chọn cách (a) vì đơn giản hơn, nhưng trong thực tế đời thường các biểu cảm cực đoan này xuất hiện rất hiếm. Phần lớn biểu cảm xảy ra ở mức độ tinh tế hơn, ví dụ chỉ khép môi hơn một chút khi không thoải mái, hay nhíu lông mày nhẹ khi tập trung. Để nắm bắt sự tinh tế này, hệ thống phải nhận dạng ở mức AU -- nhưng điều này đặt ra bài toán phân loại với không gian tổ hợp cực lớn (7000+ tổ hợp AU quan sát được).
+
+\textbf{(2) Khác biệt cá nhân (Individual Differences in Subjects).}
+Hình dạng, kết cấu da, màu sắc và lông mặt biến đổi theo giới tính, chủng tộc và độ tuổi. Sự tương phản giữa tròng đen và tròng trắng khác nhau rõ ràng giữa người châu Á và người Bắc Âu, ảnh hưởng trực tiếp đến độ chính xác eye tracking. Trẻ sơ sinh có da mịn hơn, ít nhăn hơn và cấu trúc xương khác so với người lớn -- các thuật toán tối ưu cho người lớn thực hiện kém hơn trên khuôn mặt trẻ em. Ngoài khác biệt ngoại hình, còn có khác biệt về \textit{expressiveness} -- mức độ linh hoạt cơ mặt và tần suất biểu cảm mạnh -- đủ mạnh để được dùng như đặc trưng sinh trắc học bổ sung nhận dạng danh tính.
+
+\textbf{(3) Chuyển tiếp giữa các biểu cảm (Transitions Among Expressions).}
+Một giả định đơn giản hóa phổ biến là mỗi biểu cảm bắt đầu và kết thúc ở trạng thái trung lập. Trong thực tế, các AU có thể chuyển thẳng từ tổ hợp này sang tổ hợp khác mà không qua neutral. Với additive combinations như AU12+25, hệ thống phải nhận ra đồng thời AU12 (mức độ cố định) và các mức thay đổi của AU25/26/27. Với non-additive combinations như AU12+15, sự xuất hiện tuần tự hay đồng thời tạo ra ngoại hình hoàn toàn khác nhau. Điều này đòi hỏi dữ liệu training phải bao gồm các chuyển tiếp động học, không chỉ các ảnh biểu cảm tĩnh.
+
+\textbf{(4) Cường độ biểu cảm (Intensity of Facial Expression).}
+Các AU biến đổi về cường độ theo thang 5 điểm trong FACS. Tian et al. (2000) dùng Gabor features và neural network để phân biệt cường độ nhắm mắt đáng tin cậy như human coders. Yang et al. (2009) chuyển bài toán ước lượng cường độ thành ranking problem dùng RankBoost. Quan trọng: \textit{một phương pháp hoạt động tốt với biểu cảm cường độ cao có thể tổng quát kém sang biểu cảm cường độ thấp} -- đây là vấn đề rất thực tế vì trong tương tác tự nhiên, hầu hết biểu cảm có cường độ thấp đến trung bình.
+
+\textbf{(5) Biểu cảm dàn dựng vs. tự nhiên (Deliberate vs. Spontaneous Expression).}
+Biểu cảm dàn dựng và biểu cảm tự nhiên được điều khiển bởi \textit{hai con đường thần kinh khác nhau}: pyramidal (có ý thức) và extrapyramidal (không ý thức). Hệ quả: kiểm soát cơ mặt của biểu cảm dàn dựng thường kém chính xác và kém đối xứng hơn tự nhiên. Cụp góc miệng tự nhiên khi buồn (AU15) và nâng lông mày trong (AU1+4) -- hai AU điển hình của sadness -- rất ít người thực hiện được có chủ ý, và điều này thậm chí hỗ trợ phát hiện nói dối. Sự khác biệt về tổ chức thời gian giữa hai loại biểu cảm này cực kỳ quan trọng với các phương pháp sequence-based như HMM.
+
+\textbf{(6) Tư thế đầu và độ phức tạp cảnh nền (Head Orientation and Scene Complexity).}
+Phần lớn hệ thống FER giả định khuôn mặt nhìn thẳng (frontal). Trong thực tế, chuyển động đầu lớn rất phổ biến và thường đồng thời với biểu cảm -- Kraut và Johnson (1979) phát hiện nụ cười thường xảy ra khi đầu quay về phía người đối diện. Camras et al. cho thấy ngạc nhiên ở trẻ em thường kèm với ngả đầu ra sau. Nền cảnh phức tạp với nhiều người cũng ảnh hưởng đến face detection và feature tracking -- những điều kiện rất phổ biến trong thực tế nhưng hầu như vắng mặt trong database nghiên cứu.
+
+\textbf{(7) Thu nhận ảnh và độ phân giải (Image Acquisition and Resolution).}
+Chương sách dẫn kết quả thực nghiệm về ngưỡng độ phân giải: tại $69 \times 93$ pixel, hầu hết tác vụ xử lý khuôn mặt khả thi; tại $48 \times 64$ pixel, các đặc trưng như góc mắt và miệng bắt đầu khó phát hiện; dưới $24 \times 32$ pixel, biểu cảm gần như không nhận dạng được (Hình \ref{fig:resolution_effect}). Ánh sáng thay đổi trong chuỗi video cũng tác động lớn -- nguồn sáng trên đầu tạo bóng che khuất vùng mắt, đặc biệt với người có cấu trúc xương trán nổi.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Ảnh khuôn mặt ở 4 độ phân giải (đều zoom to cùng kích thước)
+    % Từ trái qua phải: 69x93, 48x64, 32x43, 24x32
+    % Source: Table 19.4 trong chương sách
+    \includegraphics[width=0.7\textwidth]{fig_resolution_effect.png}
+    \caption{Ảnh hưởng của độ phân giải đến khả năng nhận dạng biểu cảm. Tại $48{\times}64$ pixel, các đặc trưng khuôn mặt bắt đầu khó phát hiện; tại $24{\times}32$ pixel, biểu cảm gần như không nhận dạng được. Nguồn: Tian et al. (2011), Table 19.4.}
+    \label{fig:resolution_effect}
+\end{figure}
+
+\textbf{(8) Độ tin cậy của Ground Truth (Reliability of Ground Truth).}
+Giả định cơ bản khi train mô hình là nhãn chính xác. Để đảm bảo tính hợp lệ, dữ liệu phải được mã hóa FACS thủ công và độ nhất quán liên-quan-sát phải được kiểm tra. Chương sách khuyến nghị: ít nhất 15--20\% dữ liệu nên được mã hóa độc lập bởi nhiều coder. Độ nhất quán phải đo bằng \textbf{coefficient kappa} -- không phải raw percentage vì raw percentage bị inflate bởi tần suất nhãn. Để chống drift trong tiêu chí mã hóa, cần re-standardization định kỳ.
+
+\textbf{(9) Cơ sở dữ liệu (Databases).}
+Hầu hết nghiên cứu dùng dataset nhỏ với biểu cảm toàn phần, ít đối tượng, đồng nhất về tuổi và chủng tộc, điều kiện thu nhận tối ưu. Chương sách kêu gọi cần có một large representative test-bed để so sánh công bằng giữa các phương pháp (chi tiết xem Mục \ref{subsubsec:databases}).
+
+\textbf{(10) Quan hệ với hành vi phi khuôn mặt (Relation to Other Behavior).}
+Biểu cảm khuôn mặt là một trong nhiều kênh giao tiếp phi ngôn ngữ. AU12 (nụ cười) thường đi kèm với phát âm tích cực và nâng tần số cơ bản giọng nói. Một câu hỏi quan trọng là tích hợp sớm hay muộn các phương thức khác nhau sẽ mang lại lợi ích gì.
+
+\textbf{Tóm tắt: Hệ thống AFEA lý tưởng.}
+Từ 10 chiều vấn đề, chương sách tổng hợp các thuộc tính cần có:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|l|}
+\hline
+\multicolumn{2}{|c|}{\textbf{Robustness}} \\ \hline
+Rb1 & Xử lý đối tượng đa độ tuổi, giới tính, chủng tộc \\ \hline
+Rb2 & Chịu được thay đổi ánh sáng \\ \hline
+Rb3 & Xử lý được chuyển động đầu lớn \\ \hline
+Rb4 & Xử lý được che khuất (occlusion) \\ \hline
+Rb5 & Xử lý được độ phân giải ảnh thấp \\ \hline
+Rb6 & Nhận dạng được tất cả biểu cảm có thể \\ \hline
+Rb7 & Nhận dạng được biểu cảm ở các cường độ khác nhau \\ \hline
+Rb8 & Nhận dạng được biểu cảm bất đối xứng \\ \hline
+Rb9 & Nhận dạng được biểu cảm tự nhiên (spontaneous) \\ \hline
+\multicolumn{2}{|c|}{\textbf{Automatic Process}} \\ \hline
+Am1--Am3 & Tự động toàn bộ 3 giai đoạn của pipeline \\ \hline
+\multicolumn{2}{|c|}{\textbf{Real-time Process}} \\ \hline
+Rt1--Rt3 & Real-time toàn bộ 3 giai đoạn của pipeline \\ \hline
+\multicolumn{2}{|c|}{\textbf{Autonomic Process}} \\ \hline
+An1 & Đầu ra nhận dạng có kèm độ tin cậy (confidence score) \\ \hline
+An2 & Thích ứng mức đầu ra tùy theo chất lượng ảnh đầu vào \\ \hline
+\end{tabular}
+\caption{Các thuộc tính của một hệ thống AFEA lý tưởng. Nguồn: Tian et al. (2011), Table 19.5.}
+\label{tab:ideal_afea}
+\end{table}
+
+\subsubsection{Kỹ thuật Thu nhận Khuôn mặt (Face Acquisition)}
+
+\textbf{19.4.1.1 -- Face Detection.}
+Với khuôn mặt nhìn gần thẳng, Viola và Jones (2001) phát triển bộ phát hiện khuôn mặt thời gian thực dựa trên \textbf{tập đặc trưng hình chữ nhật (rectangle features)} và thuật toán \textbf{AdaBoost}, là phương pháp phổ biến nhất được dùng trong các hệ thống AFEA. Heisele et al. (2001) phát triển hệ thống component-based có thể training được cho frontal/near-frontal faces. Rowley et al. (1998) dùng mạng neural để phát hiện frontal-view face.
+
+Để xử lý chuyển động đầu lớn ngoài mặt phẳng, các detector chuyên biệt được phát triển: Schneiderman và Kanade (2000) đề xuất phương pháp thống kê cho phát hiện 3D objects với out-of-plane rotation, dùng tích phân phân phối (product of histograms) của wavelet coefficients. Li et al. (2001) dùng AdaBoost-like approach để phát hiện khuôn mặt từ nhiều góc nhìn.
+
+Trong thực tế, nhiều hệ thống AFEA chỉ phát hiện khuôn mặt ở frame đầu tiên (giả sử frontal, expressionless) rồi dùng feature tracking hoặc head tracking cho các frame tiếp theo, tiết kiệm chi phí tính toán.
+
+\textbf{19.4.1.2 -- Head Pose Estimation.}
+Để xử lý chuyển động đầu lớn ngoài mặt phẳng, có hai hướng:
+
+\textit{3D Model-Based Methods:} Sử dụng mô hình 3D của đầu người để ước lượng 6 bậc tự do (DOF) của chuyển động đầu. Xiao et al. (2003) sử dụng \textbf{cylindrical head model} kết hợp với \textbf{Active Appearance Model (AAM)} -- phương pháp tự động ánh xạ mô hình trụ lên vùng khuôn mặt. Với mỗi frame, template là ảnh đầu từ frame trước chiếu lên mô hình trụ, sau đó được so khớp với ảnh hiện tại để ước lượng chuyển động. Hệ thống dùng iteratively reweighted least squares để xử lý chuyển động phi cứng thể (non-rigid motion) và che khuất. Để tránh tích lũy sai số, hệ thống tự động chọn và lưu các frame tham chiếu (reference frames) -- khi pose hiện tại gần với reference, hệ thống re-register để hiệu chỉnh sai số. Hệ thống được đánh giá với yaw tối đa 75 độ và pitch 40 độ, sai số tuyệt đối trung bình khoảng 3.86 độ (Hình \ref{fig:head_tracking}).
+
+\begin{figure}[H]
+    \centering
+    % TODO: Minh họa 3D head tracking
+    % Gợi ý: Sequence ảnh khuôn mặt ở các góc quay khác nhau với model overlay
+    % Thêm ví dụ re-registration sau khi mất track
+    % Source: Fig 19.3 trong chương sách
+    \includegraphics[width=0.8\textwidth]{fig_head_tracking.png}
+    \caption{Minh họa 3D head tracking với cylindrical head model: theo dõi liên tục qua các tư thế khác nhau, kèm re-registration sau khi mất track. Nguồn: Xiao et al. (2003), trích dẫn trong Tian et al. (2011).}
+    \label{fig:head_tracking}
+\end{figure}
+
+\textit{2D Image-Based Methods:} Tian et al. (2003) phát hiện đầu người thay vì khuôn mặt, dùng silhouette của foreground object và tính các điểm cực tiểu độ cong âm (negative curvature minima -- NCM) của silhouette để định vị đầu. Sau khi định vị, ảnh đầu được chuyển sang grayscale, histogram equalization và resize. Một \textbf{mạng neural 3 lớp} phân loại tư thế đầu thành 3 lớp (Bảng \ref{tab:head_pose}): (1) frontal/near-frontal -- cả hai mắt và hai góc môi đều nhìn thấy, (2) side/profile -- ít nhất một mắt hoặc một góc môi bị tự che khuất, (3) khác (phía sau đầu, bị che). Chỉ khuôn mặt thuộc lớp (1) mới được đưa vào phân tích biểu cảm.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|c|l|l|}
+\hline
+\textbf{Lớp} & \textbf{Tên} & \textbf{Mô tả} \\ \hline
+1 & Frontal / Near-frontal & Cả hai mắt và hai góc môi đều nhìn thấy \\ \hline
+2 & Side / Profile & Ít nhất một mắt hoặc góc môi bị che khuất bởi đầu \\ \hline
+3 & Others & Phía sau đầu, bị che hoàn toàn, v.v. \\ \hline
+\end{tabular}
+\caption{Ba lớp tư thế đầu trong phương pháp 2D image-based của Tian et al. (2003). Chỉ lớp 1 được đưa vào phân tích biểu cảm.}
+\label{tab:head_pose}
+\end{table}
+
+\subsubsection{Trích xuất và Biểu diễn Đặc trưng}
+\label{subsec:feature_extraction}
+
+Sau khi khuôn mặt được định vị, hệ thống cần phân tích \textit{sự thay đổi} trên khuôn mặt gây ra bởi biểu cảm. Chương sách xác định hai hướng tiếp cận song song và bổ sung cho nhau: \textbf{geometric features} và \textbf{appearance features}.
+
+\textbf{(1) Geometric Features -- Đặc trưng hình học.}
+
+Geometric features mô tả \textit{hình dạng và vị trí} của các thành phần khuôn mặt (permanent features): mắt, lông mày, môi, mũi, má. Ý tưởng cơ bản là khi biểu cảm thay đổi, vị trí và hình dạng của các thành phần này thay đổi theo -- và những thay đổi đó có thể được đo lường và mã hóa thành vector đặc trưng.
+
+Tian et al. (2001) phát triển \textbf{multi-state models} để theo dõi và mã hóa trạng thái của từng thành phần khuôn mặt (Hình \ref{fig:facial_components}):
+\begin{itemize}
+    \item \textbf{Môi (Lip model):} 3 trạng thái -- mở rộng (open), đóng (closed), khép chặt (tightly closed)
+    \item \textbf{Mỗi mắt (Eye model):} 2 trạng thái -- mở (open), nhắm (closed)
+    \item \textbf{Mỗi lông mày và má:} 1 trạng thái liên tục (continuous position)
+\end{itemize}
+
+Hệ thống tổng hợp \textbf{15 tham số cho vùng mặt trên} (upper face: mắt, lông mày, trán) và \textbf{9 tham số cho vùng mặt dưới} (lower face: môi, cằm, má). Tất cả tham số được chuẩn hóa theo ảnh tham chiếu (reference frame -- ảnh trung lập) để loại bỏ sự khác biệt về kích thước khuôn mặt và chuyển động đầu trong mặt phẳng.
+
+Ngoài permanent features, chương sách cũng đề cập đến \textbf{transient features} -- các đặc trưng thoáng hiện chỉ xuất hiện khi có biểu cảm cụ thể, ví dụ nếp nhăn nasolabial (rãnh mũi-miệng) và nếp nhăn đuôi mắt (crow's feet wrinkles). Các đặc trưng này được mã hóa theo trạng thái nhị phân: có mặt (present) hoặc vắng mặt (absent).
+
+\begin{figure}[H]
+    \centering
+    % TODO: Ảnh minh họa các facial components được tracking
+    % Gợi ý (a): Ảnh khuôn mặt với multi-state models overlay -- contours cho mắt, môi, lông mày
+    % Gợi ý (b): Ảnh khuôn mặt với transient features -- nếp nhăn được highlight
+    % Source: Fig 19.4 và 19.5 trong chương sách
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig_geometric_model.png}
+        \caption{Multi-state models cho trích xuất đặc trưng hình học: contours của mắt, lông mày và môi.}
+        \label{fig:geometric_model}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{fig_transient_features.png}
+        \caption{Transient features: nếp nhăn nasolabial, nếp nhăn đuôi mắt, và nếp nhăn gốc mũi.}
+        \label{fig:transient_features}
+    \end{subfigure}
+    \caption{Trích xuất đặc trưng khuôn mặt: (a) permanent features với multi-state models, (b) transient features. Nguồn: Tian et al. (2001).}
+    \label{fig:facial_components}
+\end{figure}
+
+\textbf{(2) Appearance Features -- Đặc trưng ngoại hình.}
+
+Appearance features mô tả \textit{sự thay đổi kết cấu da} (texture changes) mà các thành phần hình học không nắm bắt được. Khi biểu cảm thay đổi, da co giãn, xuất hiện các nếp nhăn và thay đổi phân phối cường độ pixel theo những pattern đặc trưng.
+
+\textbf{Gabor wavelets} là phương pháp trích xuất appearance features phổ biến nhất trong chương sách. Bộ lọc Gabor 2D là tích của hàm Gaussian và hàm sinusoidal, được định nghĩa bởi tần số không gian $f$ và hướng $\theta$:
+
+\begin{equation}
+    G(x, y; f, \theta) = \frac{f^2}{\pi \gamma \eta} \exp\!\left(-\frac{f^2}{\gamma^2}x'^2 - \frac{f^2}{\eta^2}y'^2\right) \exp(2\pi i f x')
+    \label{eq:gabor}
+\end{equation}
+
+trong đó $x' = x\cos\theta + y\sin\theta$, $y' = -x\sin\theta + y\cos\theta$, $\gamma$ và $\eta$ là các tham số hình dạng của Gaussian. Bộ lọc Gabor có khả năng phát hiện các pattern texture ở nhiều tần số và hướng khác nhau, tương tự cơ chế xử lý của visual cortex sơ cấp ở não người.
+
+Tian et al. (2002) sử dụng bộ lọc Gabor với \textbf{5 tần số không gian} $\times$ \textbf{8 hướng} = \textbf{40 bộ lọc} tổng cộng, áp dụng tại các vị trí cố định trên khuôn mặt:
+\begin{itemize}
+    \item 480 Gabor coefficients cho vùng mặt trên (20 vị trí $\times$ 24 hệ số mỗi vị trí)
+    \item 432 Gabor coefficients cho vùng mặt dưới (18 vị trí $\times$ 24 hệ số mỗi vị trí)
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % TODO: Minh họa Gabor wavelets
+    % Gợi ý (a): Grid 5x8 hiển thị 40 Gabor filters với các tần số và hướng khác nhau
+    % Gợi ý (b): Ảnh khuôn mặt + heatmap Gabor response tại các vị trí sampling
+    % Hoặc: so sánh ảnh gốc vs Gabor-filtered với vài orientation/scale
+    \includegraphics[width=0.75\textwidth]{fig_gabor_wavelets.png}
+    \caption{Minh họa bộ lọc Gabor wavelet với 5 tần số không gian và 8 hướng (tổng 40 bộ lọc). Mỗi bộ lọc phát hiện pattern texture ở một tần số và hướng cụ thể.}
+    \label{fig:gabor_wavelets}
+\end{figure}
+
+Bartlett et al. (2006) áp dụng Gabor lên \textit{toàn bộ ảnh mặt} thay vì các điểm cụ thể, kết hợp với Gabor Energy Filter (bình phương và tổng đầu ra của hai bộ lọc Gabor vuông pha) để tăng robustness với điều kiện ánh sáng và dịch chuyển nhỏ của ảnh. Đây là cách mô hình hóa hoạt động của \textit{complex cells} trong thị giác sơ cấp của não.
+
+\textbf{Kết hợp hai loại đặc trưng.}
+Tian et al. (2002) thực hiện nghiên cứu so sánh toàn diện trên Cohn-Kanade database -- bộ dữ liệu đa dạng bao gồm cả đối tượng người Âu, Phi và Á:
+\begin{itemize}
+    \item Gabor wavelets đơn lẻ: hoạt động tốt cho AU đơn giản trên tập dữ liệu \textit{đồng nhất}, nhưng kém khi có tổ hợp AU và đối tượng đa dạng
+    \item Geometric features đơn lẻ: nhất quán tốt hơn, đạt tỷ lệ nhận dạng cao với hầu hết AU ngoại trừ AU7 (Lid Tightener)
+    \item \textbf{Kết hợp cả hai:} cải thiện nhận dạng cho \textit{tất cả} AU, đặc biệt là các AU phức tạp và tổ hợp
+\end{itemize}
+
+Nhận xét quan trọng: sự khác biệt giữa các nghiên cứu trước (Zhang et al. 1998 chỉ dùng người Nhật; Donato et al. 1999 chỉ dùng người Euro-American) và kết quả của Tian et al. cho thấy \textbf{tính đa dạng của tập dữ liệu ảnh hưởng lớn đến kết luận} về ưu nhược điểm của từng loại đặc trưng.
+
+\subsubsection{Nhận dạng Biểu cảm (Expression Recognition)}
+
+Bước cuối cùng của pipeline AFEA, nhận dạng biểu cảm từ vector đặc trưng đã trích xuất. Chương sách phân loại các phương pháp thành hai nhóm dựa trên việc có dùng thông tin thời gian hay không.
+
+\textbf{Frame-based Recognition -- Nhận dạng từng ảnh.}
+Không dùng thông tin thời gian, phân tích từng frame độc lập (có hoặc không có ảnh reference -- thường là ảnh neutral):
+
+\textit{Neural Networks:} Tian et al. (2001) dùng mạng 3 lớp với back-propagation, các mạng riêng cho upper face và lower face. Đây là \textbf{hệ thống đầu tiên xử lý tổ hợp AU}: thay vì coi mỗi tổ hợp là một lớp riêng (cách tiếp cận phổ biến trước đó), mạng được huấn luyện để kích hoạt đồng thời nhiều output nodes khi các AU xuất hiện kết hợp. Kết quả: \textbf{95.5\%} trên neutral + 16 AU đơn và tổ hợp.
+
+\textit{Support Vector Machines (SVM):} Bartlett et al. (2002) dùng SVM với Gabor features cho pairwise classifiers, sau đó kết hợp bằng Multinomial Logistic Regression (MLR) để tạo phân phối xác suất trên 6 cảm xúc. Kết quả tốt nhất: \textbf{91.5\%} với MLR.
+
+\textit{RankBoost:} Yang et al. (2009) chuyển bài toán nhận dạng và ước lượng cường độ thành ranking problem với L1 regularization. Đạt \textbf{88\%} trên 6 cảm xúc, đồng thời ước lượng được cường độ.
+
+\textit{Bayesian Networks:} Cohen et al. (2003) so sánh Gaussian Naive Bayes, Cauchy Naive Bayes và Tree Augmented Naive Bayes (TAN). TAN đạt kết quả tốt nhất \textbf{73.2\%} trên person-independent test với Cohn-Kanade.
+
+\textbf{Sequence-based Recognition -- Nhận dạng theo chuỗi.}
+Khai thác thông tin thời gian của chuỗi frames:
+
+\textit{Hidden Markov Models (HMM):} Bartlett et al. (2006) dùng SVM để trích xuất đặc trưng Gabor, sau đó dùng HMM để mô hình hóa dynamics thời gian của AU. Hai cách: (1) HMM nhận trực tiếp Gabor coefficients (giảm chiều bằng PCA xuống 100D), (2) HMM nhận output của SVM. Kết quả tốt nhất: \textbf{98.1\%} blink/non-blink với SVM outputs.
+
+\textit{Rule-based classifier:} Cohn et al. (2002) dùng bộ phân loại dựa quy tắc cho eye và brow AUs trong hành vi spontaneous. Đạt \textbf{98\%} tổng thể cho 3 hành vi mắt: blink (AU45), flutter (blink lặp lại), non-blink. Với brow region: \textbf{57\%} tổng thể (brow-up, brow-down, non-brow motion) -- thấp hơn do số lượng brow-down quá ít và che khuất bởi kính mắt.
+
+Bảng \ref{tab:recognition_methods} tóm tắt các phương pháp nhận dạng được đề cập trong chương:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|l|c|l|l|}
+\hline
+\textbf{Hệ thống} & \textbf{Phương pháp} & \textbf{Rate} & \textbf{Output} & \textbf{Database} \\ \hline
+Tian et al. [94--96] & NN (frame) & 95.5\% & 16 AU + combinations & Ekman-Hager, CK \\ \hline
+Cohn et al. [18] & Rule-based (seq) & 100\% & Blink / non-blink & Frank-Ekman \\ \hline
+ & & 57\% & Brow up/down/none & \\ \hline
+Bartlett et al. [37] & SVM + MLR (frame) & 91.5\% & 6 basic emotions & CK \\ \hline
+Bartlett et al. [5] & AdaBoost+SVM (seq) & 80.1\% & 20 facial actions & Frank-Ekman \\ \hline
+Cohen et al. [15] & BN + HMM (seq) & 73.2\% & 6 basic emotions & CK \\ \hline
+ & & 66.5\% & 6 basic emotions & UIUC-Chen \\ \hline
+Wen \& Huang [102] & NN + GMM (frame) & 71\% & 6 basic emotions & CK \\ \hline
+Yang et al. [111] & RankBoost (frame) & 88\% & 6 basic emotions & CK \\ \hline
+\end{tabular}
+\caption{Tổng hợp các phương pháp nhận dạng biểu cảm FACS AU và cảm xúc (CK = Cohn-Kanade database). Nguồn: Table 19.7, Tian et al. (2011).}
+\label{tab:recognition_methods}
+\end{table}
+
+\subsubsection{Phân tích Đa phương thức (Multimodal Expression Analysis)}
+
+Biểu cảm khuôn mặt là một trong nhiều kênh giao tiếp phi ngôn ngữ. Gần đây, một số nhóm nghiên cứu đã tích hợp phân tích biểu cảm khuôn mặt với các phương thức khác.
+
+Cohn et al. (2009) điều tra quan hệ giữa facial actions và vocal prosody cho phát hiện trầm cảm (depression detection). Họ đạt cùng tỷ lệ chính xác \textbf{79\%} bằng cả facial actions và vocal prosody riêng lẻ, nhưng chưa báo cáo kết quả kết hợp.
+
+Gunes và Piccardi (2009) kết hợp biểu cảm khuôn mặt với cử chỉ cơ thể (body gestures) trên FABO database cho 9 biểu cảm. Hệ thống dùng 152 face features và 170 body features, kiểm tra cả frame-based và sequence-based classifiers (Hình \ref{fig:multimodal_fabo}). Kết quả:
+\begin{itemize}
+    \item Chỉ face features: 35.22\%
+    \item Chỉ body features: \textbf{76.87\%}
+    \item Kết hợp face + body: \textbf{85\%}
+\end{itemize}
+
+Kết quả đáng chú ý là body features đơn lẻ vượt trội face features đơn lẻ rõ ràng -- cho thấy trong nhiều ngữ cảnh, cơ thể truyền đạt cảm xúc mạnh hơn khuôn mặt. Sự kết hợp hai phương thức mang lại cải thiện đáng kể.
+
+\begin{figure}[H]
+    \centering
+    % TODO: Minh họa multimodal system (FABO)
+    % Gợi ý (a): Ảnh khuôn mặt với face feature extraction (AU + geometric landmarks)
+    % Gợi ý (b): Ảnh người với shoulder extraction và optical flow cho body gestures
+    % Source: Fig 19.7 trong chương sách
+    \includegraphics[width=0.85\textwidth]{fig_multimodal_fabo.png}
+    \caption{Trích xuất đặc trưng trong hệ thống multimodal FABO: (a) face features -- kết hợp appearance và geometric features; (b) body features -- phát hiện và tracking vai và tay bằng optical flow. Nguồn: Gunes \& Piccardi (2009), trích dẫn trong Tian et al. (2011).}
+    \label{fig:multimodal_fabo}
+\end{figure}
+
+\subsubsection{Cơ sở dữ liệu chuẩn (Databases)}
+\label{subsubsec:databases}
+
+Database đóng vai trò quan trọng để train, đánh giá và so sánh các phương pháp FER. Chương sách tổng hợp các database công khai chính:
+
+\textbf{Cohn-Kanade (CK) \cite{kanade2000}:} Database phổ biến nhất trong nghiên cứu AFEA. Hành vi khuôn mặt được ghi lại cho \textbf{210 người lớn} (18--50 tuổi, 69\% nữ, 81\% Euro-American, 13\% Afro-American) từ hai góc nhìn (frontal và 30 độ). Tổng cộng 1917 image sequences từ frontal view của 182 subjects được FACS-coded cho target AUs hoặc toàn bộ sequence.
+
+\textbf{JAFFE (Japanese Female Facial Expression):} 213 ảnh của 6 biểu cảm cơ bản và neutral từ \textbf{10 phụ nữ Nhật}. Là database đầu tiên có thể download công khai cho nghiên cứu FER, nhưng rất hạn chế về số lượng đối tượng và đa dạng chủng tộc.
+
+\textbf{MMI Facial Expression Database:} Hơn \textbf{1500 mẫu} ảnh tĩnh và chuỗi video từ \textbf{19 subjects} ở cả góc frontal và profile, bao gồm AU đơn lẻ, tổ hợp, và nhận dạng temporal segments (onset, apex, offset).
+
+\textbf{FABO (Bimodal Face and Body Gesture Database):} Chuỗi ảnh từ \textbf{23 subjects} với 9 biểu cảm (uncertainty, anger, surprise, fear, anxiety, happiness, disgust, boredom, sadness). Được ghi từ \textbf{hai camera đồng bộ}: một cho khuôn mặt frontal, một cho cơ thể phần trên -- database multimodal đầu tiên tích hợp face và body gestures.
+
+\textbf{RU-FACS (Spontaneous Expression Database):} \textbf{100 subjects} tham gia paradigm ``false opinion'' -- môi trường eliciting spontaneous expressions tự nhiên với speech-related mouth movements và out-of-plane head rotation từ 4 góc nhìn. Là một trong số ít database ghi lại biểu cảm \textit{tự nhiên} (spontaneous) với FACS coding nghiêm ngặt.
+
+\textbf{BU-3DFE / BU-4DFE:} Hai database 3D của Binghamton University. BU-3DFE chứa 2500 3D facial expression models (neutral + 6 biểu cảm cơ bản) từ 100 subjects, kèm 2 ảnh texture từ góc $\pm45°$. BU-4DFE mở rộng sang không gian 4D (3D + thời gian) với 606 chuỗi 3D facial expression từ 101 subjects, tần số 25 fps, độ phân giải texture $1040 \times 1329$.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Database} & \textbf{Ảnh/Video} & \textbf{Subjects} & \textbf{Expressions} & \textbf{Neutral} & \textbf{Spontaneous} & \textbf{3D} \\ \hline
+Cohn-Kanade & Video & 210 & Basic + AUs & \cmark & \xmark & \xmark \\ \hline
+JAFFE & Ảnh & 10 & 6 basic & \cmark & \xmark & \xmark \\ \hline
+MMI & Ảnh + Video & 19 & AUs & \cmark & \xmark & \xmark \\ \hline
+FABO & Video & 23 & 9 expressions & \cmark & \xmark & \xmark \\ \hline
+RU-FACS & Video & 100 & AUs & \cmark & \cmark & \xmark \\ \hline
+BU-3DFE & Ảnh 3D & 100 & 6 basic & \cmark & \xmark & \cmark \\ \hline
+BU-4DFE & Video 3D & 101 & 6 basic & \cmark & \xmark & \cmark \\ \hline
+\end{tabular}
+\caption{Tổng hợp các database chuẩn cho nghiên cứu FER được đề cập trong chương sách. Nguồn: Table 19.8, Tian et al. (2011).}
+\label{tab:databases}
+\end{table}
+
+\subsubsection{Bảy Câu hỏi Mở (Open Questions)}
+
+Chương sách kết thúc với 7 câu hỏi còn bỏ ngỏ, phản ánh những hạn chế căn bản vào năm 2011 -- và nhiều câu vẫn còn giá trị đến ngày nay:
+
+\textbf{(1) Con người nhận dạng biểu cảm như thế nào?}
+Nghiên cứu nhận thức và tri giác đã diễn ra nhiều thập kỷ nhưng cơ chế vẫn chưa rõ. Tham số nào con người sử dụng và xử lý chúng như thế nào? Bằng cách so sánh nhận dạng của con người và máy, ta có thể cải thiện cả hai.
+
+\textbf{(2) Phân tích ở mức độ chi tiết hơn có luôn tốt hơn không?}
+Câu trả lời phụ thuộc vào chất lượng ảnh và loại ứng dụng. Với ảnh chất lượng cao, nhận dạng AU đầy đủ là khả thi và emotion labels có thể suy ra từ AU prototypes. Với ảnh chất lượng thấp, chỉ nhận dạng được subset của AU, và nhận dạng trực tiếp emotion label có thể cần thiết. Chương sách kêu gọi hệ thống ``self-aware'' -- tự biết mức độ nhận dạng khả thi dựa trên chất lượng đầu vào.
+
+\textbf{(3) Có cách mã hóa biểu cảm tốt hơn FACS không?}
+FACS là human-observer-based system với khả năng phân biệt cường độ hạn chế (thang thứ tự, không phải khoảng đo lường). Vẫn cần một hệ thống mã hóa dựa trên máy tính với định nghĩa định lượng hơn.
+
+\textbf{(4) Làm sao thu được ground truth đáng tin cậy?}
+Phần lớn nghiên cứu dùng emotion-specified expressions mà không được định nghĩa rõ ràng -- cùng một nhãn có thể áp dụng cho những biểu cảm rất khác nhau. Tối thiểu, các nhà nghiên cứu nên công bố tiêu chí gán nhãn và inter-observer agreement.
+
+\textbf{(5) Làm sao nhận dạng biểu cảm trong điều kiện thực tế?}
+FER thực tế khó hơn nhiều so với posed expressions: chuyển động đầu, ảnh độ phân giải thấp, không có neutral reference, biểu cảm cường độ thấp. Đây chính xác là vấn đề mà bài báo CAFE (2024) được nhóm lựa chọn hướng đến giải quyết -- thông qua zero-shot generalization.
+
+\textbf{(6) Làm sao khai thác tốt nhất thông tin thời gian?}
+Hầu hết nghiên cứu tập trung vào nhận dạng biểu cảm rời rạc, bỏ qua timing của facial actions. Nghiên cứu gần đây cho thấy biểu cảm tự nhiên và dàn dựng có thể phân biệt qua timing parameters -- quan trọng cho cả lie detection và điều khiển avatar ảo.
+
+\textbf{(7) Làm sao tích hợp phân tích biểu cảm với các phương thức khác?}
+Biểu cảm khuôn mặt cần được kết hợp với prosody, gesture và speech để tăng độ chính xác và giảm nhập nhằng. Kết hợp facial features với acoustic features giúp tách biệt thay đổi khuôn mặt do biểu cảm vs. do speech-related movements.
+
+% ============= SECTION 3: LỊCH SỬ PHÁT TRIỂN FER =============
+\section{LỊCH SỬ PHÁT TRIỂN VÀ XU HƯỚNG NGHIÊN CỨU FER}
+
+\subsection{Từ tiếp cận thủ công đến học sâu}
+
+Bài toán nhận dạng biểu cảm khuôn mặt đã trải qua hơn 40 năm phát triển, từ những nỗ lực đầu tiên dựa hoàn toàn trên quy tắc thủ công đến các hệ thống học sâu hiện đại. Có thể chia lịch sử này thành ba giai đoạn chính:
+
+\textbf{Giai đoạn 1 -- Handcrafted Features và Rule-based Systems (trước 2012).}
+Đây là giai đoạn của chương sách mà nhóm nghiên cứu. Đặc điểm nổi bật:
+\begin{itemize}
+    \item Đặc trưng được thiết kế thủ công bởi con người: Gabor wavelets, LBP (Local Binary Patterns), HOG (Histogram of Oriented Gradients), optical flow
+    \item Bộ phân loại truyền thống: SVM, Neural Network nông, HMM
+    \item Dữ liệu nhỏ, thu thập trong phòng lab, biểu cảm dàn dựng (posed)
+    \item Tỷ lệ nhận dạng đạt 80--95\% trên tập kiểm tra \textit{cùng điều kiện} với tập huấn luyện
+    \item Thất bại nặng nề khi điều kiện thay đổi (ánh sáng, tư thế, đối tượng mới)
+\end{itemize}
+
+Suwa et al. (1978) là nỗ lực tự động hóa đầu tiên với 20 điểm tracking. Tian et al. (2001) với hệ thống geometric + Gabor và NN đạt 95.5\% trên 16 AU -- milestone quan trọng nhất của giai đoạn này.
+
+\textbf{Giai đoạn 2 -- Deep Learning và In-the-Wild Datasets (2013--2020).}
+Sự xuất hiện của AlexNet (2012) và các deep learning framework đánh dấu bước ngoặt. Đặc điểm:
+\begin{itemize}
+    \item \textbf{CNN tự động học đặc trưng} từ dữ liệu, không cần thiết kế thủ công. Mạng có thể học các representation phức tạp hơn Gabor wavelets nhiều bậc
+    \item Bùng nổ các dataset in-the-wild: FER2013 (35K ảnh từ Google Images), AffectNet (450K ảnh), RAF-DB (15K ảnh) -- thách thức hơn nhiều so với lab dataset
+    \item Các kỹ thuật xử lý overfitting và label noise trở thành vấn đề trung tâm (SCN -- Uncertainty Suppression, RUL -- Relative Uncertainty Learning)
+    \item Tích hợp attention mechanism để tập trung vào vùng khuôn mặt quan trọng
+\end{itemize}
+
+\textbf{Giai đoạn 3 -- Foundation Models và Generalization (2021--nay).}
+Sự xuất hiện của Vision Transformer (ViT), CLIP và các large pre-trained models mở ra hướng đi mới:
+\begin{itemize}
+    \item Thay vì train từ đầu, tận dụng \textbf{knowledge} từ mô hình được pre-train trên dữ liệu khổng lồ
+    \item Vấn đề \textbf{domain generalization} trở thành trọng tâm: làm sao một mô hình hoạt động tốt trên các domain chưa thấy trong training?
+    \item CAFE (2024) -- bài báo nhóm chọn -- là đại diện tiêu biểu của giai đoạn này
+\end{itemize}
+
+\subsection{Từ Chương sách đến Bài báo SOTA: Khoảng cách 13 năm}
+
+Sự khác biệt căn bản giữa chương sách (2011) và bài báo CAFE (2024) không chỉ là về kỹ thuật, mà là về \textit{triết lý thiết kế} và \textit{định nghĩa vấn đề}:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{4.5cm}|p{4.5cm}|}
+\hline
+\textbf{Chiều so sánh} & \textbf{Chương sách (2011)} & \textbf{CAFE (2024)} \\ \hline
+Triết lý feature & Handcrafted: con người thiết kế đặc trưng dựa trên hiểu biết giải phẫu & Learned: mô hình tự học từ dữ liệu \\ \hline
+Định nghĩa ``tốt'' & Accuracy cao trên test set cùng domain & Generalization tốt trên domain chưa thấy \\ \hline
+Mối quan tâm về data & Nhỏ, đồng nhất, lab-controlled & Lớn, đa dạng, in-the-wild, noisy labels \\ \hline
+Bottleneck & Feature engineering (thiết kế đặc trưng tốt) & Domain gap (khoảng cách phân phối) \\ \hline
+\end{tabular}
+\caption{So sánh triết lý thiết kế giữa hai giai đoạn phát triển FER}
+\label{tab:era_comparison}
+\end{table}
+
+Đáng chú ý, câu hỏi mở số 5 của chương sách -- \textit{``How do we recognize facial expressions in real life?''} -- chính xác là vấn đề mà CAFE (2024) nỗ lực giải quyết. Điều này cho thấy cộng đồng nghiên cứu đã nhận thức được hạn chế từ rất sớm, nhưng phải đợi đến khi có đủ dữ liệu và nền tảng kỹ thuật (large pre-trained models) thì mới có thể tiếp cận bài toán một cách có hệ thống.
+
+% ============= SECTION 4: BÀI BÁO SOTA =============
+\section{NGHIÊN CỨU BÀI BÁO KHOA HỌC TIÊN TIẾN}
+
+\subsection{Thông tin bài báo}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{rl}
+\textbf{Tiêu đề:}   & Generalizable Facial Expression Recognition \\
+\textbf{Tác giả:}   & Yuhang Zhang, Xiuqi Zheng, Chenyi Liang, Jiani Hu, Weihong Deng \\
+\textbf{Tổ chức:}   & Beijing University of Posts and Telecommunications \\
+\textbf{Năm:}       & 2024 (arXiv:2408.10614, tháng 8/2024) \\
+\textbf{Mã nguồn:}  & \url{https://github.com/zyh-uaiaaaa/Generalizable-FER} \\
+\end{tabular}
+\caption{Thông tin bài báo SOTA được chọn}
+\label{tab:paper_info}
+\end{table}
+
+\subsection{Động lực nghiên cứu -- \textit{Why}}
+
+\textbf{Vấn đề: Domain Gap trong FER.}
+Các phương pháp FER hiện đại như EAC (ECCV 2022), SCN (CVPR 2020), RUL (NeurIPS 2021) và OFER (ICCV 2023) đạt độ chính xác cao trên test set \textit{cùng domain} với train set, nhưng \textbf{sụp đổ nghiêm trọng} khi test set đến từ domain khác (Hình \ref{fig:domain_gap}). Ví dụ cụ thể từ bài báo:
+
+\begin{itemize}
+    \item EAC train trên RAF-DB: đạt \textbf{89.54\%} trên test set RAF-DB, nhưng chỉ \textbf{43.91\%} trên AffectNet
+    \item SCN train trên RAF-DB: 87.32\% trên RAF-DB test, nhưng chỉ 36.52\% trên MMA
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    % TODO: Bar chart so sánh accuracy của EAC/SCN khi train trên RAF-DB
+    %       và test trên RAF-DB (source, cao) vs các dataset khác (target, thấp)
+    \includegraphics[width=0.7\textwidth]{fig_domain_gap.png}
+    \caption{Minh họa vấn đề domain gap: các phương pháp SOTA đạt accuracy cao trên source domain test set nhưng thất bại trên target domains. Nguồn: Zhang et al. (2024).}
+    \label{fig:domain_gap}
+\end{figure}
+
+\textbf{Nguyên nhân.} Vấn đề này xuất phát từ \textbf{domain-specific information} mà các mô hình FER vô tình học theo trong training: phong cách ảnh (studio vs. web-crawled), quy cách chú thích nhãn (mỗi dataset có tiêu chí khác nhau), phân phối chủng tộc và văn hóa. Các phương pháp fit quá khít với train set sẽ tổng quát hóa kém sang domain mới. Đáng chú ý, EAC có accuracy cao hơn SCN trên source domain nhưng lại thấp hơn SCN trên nhiều target domain -- cho thấy việc ``fit tốt hơn'' không đồng nghĩa với ``generalize tốt hơn''.
+
+\textbf{Hạn chế của giải pháp hiện tại.} Domain adaptation FER yêu cầu tiếp cận được mẫu (dù không có nhãn) từ target domain. Trong triển khai thực tế, ta không thể biết trước phân phối dữ liệu test sẽ đến từ đâu -- khiến domain adaptation trở thành \textbf{bất khả thi}.
+
+\textbf{Bài toán mới: Zero-shot Generalization (GFER).} Zhang et al. đặt ra bài toán \textit{Generalizable FER}: train chỉ trên một dataset duy nhất, không sử dụng bất kỳ mẫu nào từ target domain, nhưng phải nhận dạng tốt trên nhiều test set có domain gap khác nhau -- cận cảnh hơn với triển khai thực tế.
+
+\subsection{Ý tưởng chính -- \textit{What} và \textit{How}}
+
+\textbf{Cảm hứng từ nhận thức người.} Con người nhận dạng biểu cảm theo cơ chế hai bước: (1) nhìn thấy và định vị khuôn mặt -- tách khỏi background và các yếu tố domain-specific; (2) tập trung vào đặc trưng biểu cảm -- chọn lọc thông tin liên quan đến biểu cảm từ tổng thể khuôn mặt. Phương pháp CAFE (Cognition of humAn for Facial Expression) mô phỏng đúng hai bước này.
+
+\textbf{Kiến trúc tổng quát CAFE.} Pipeline bao gồm 3 thành phần chính (Hình \ref{fig:cafe_framework}):
+
+\begin{figure}[H]
+    \centering
+    % TODO: Sơ đồ kiến trúc CAFE theo Fig 2 trong bài báo
+    % Input -> CLIP (fixed) -> F -> ResNet-18 -> M -> Sigmoid -> Ms
+    % Ms * F = F_tilde -> Channel Separation (7 pieces) -> MaxPool -> Logits
+    % Losses: l_cls, l_sep, l_div
+    \includegraphics[width=\textwidth]{fig_cafe_framework.png}
+    \caption{Kiến trúc tổng quát của phương pháp CAFE. CLIP được đóng băng để trích xuất đặc trưng khuôn mặt tổng quát; ResNet-18 học sigmoid mask để chọn lọc đặc trưng biểu cảm; Channel Separation và Diverse Loss tăng cường khả năng generalization. Nguồn: Zhang et al. (2024).}
+    \label{fig:cafe_framework}
+\end{figure}
+
+\textbf{Thành phần 1 -- Fixed CLIP Face Features.}
+CLIP (Radford et al., 2021) được pre-train trên hàng trăm triệu cặp ảnh-văn bản từ Internet, cho đặc trưng có khả năng generalize mạnh qua nhiều domain. Zhang et al. dùng ViT-B/32 visual encoder để trích xuất $\mathbf{F} \in \mathbb{R}^{N \times C}$ ($C = 512$). CLIP được \textbf{đóng băng hoàn toàn} trong suốt training -- bất kỳ gradient nào cũng không được phép cập nhật CLIP weights -- nhằm bảo toàn khả năng generalization.
+
+\textbf{Thành phần 2 -- Sigmoid Mask Learning.}
+CLIP features là đặc trưng khuôn mặt tổng quát bao gồm cả thông tin nhận diện danh tính, tuổi tác, ánh sáng -- không liên quan đến biểu cảm. ResNet-18 được huấn luyện để học mask $\mathbf{M}$ nhằm chọn lọc ra các kênh đặc trưng liên quan đến biểu cảm:
+
+\begin{equation}
+    \mathbf{M}_s = \text{Sigmoid}(\mathbf{M}), \quad \mathbf{M}_s \in [0,1]^{N \times C}
+    \label{eq:sigmoid_mask}
+\end{equation}
+
+Hàm sigmoid đóng vai trò then chốt: ép giá trị mask về $[0, 1]$, mang ý nghĩa xác suất lựa chọn từng kênh đặc trưng -- tạo ra dạng \textit{soft channel attention}. Nếu không có sigmoid, mask có thể nhận giá trị tùy ý và overfit mạnh hơn. Đặc trưng sau chọn lọc:
+
+\begin{equation}
+    \tilde{\mathbf{F}} = \mathbf{M}_s \odot \mathbf{F}
+    \label{eq:masked_feature}
+\end{equation}
+
+\textbf{Thành phần 3 -- Channel Separation và Channel-Diverse Loss.}
+$\tilde{\mathbf{F}}$ được chia thành $L=7$ phần theo chiều kênh, mỗi phần được thiết kế để tập trung vào một biểu cảm cơ bản. Với $C=512$ và $L=7$: 6 biểu cảm mỗi lớp được gán 73 kênh, neutral 74 kênh. Max Pooling thay cho FC layer để tạo logits:
+
+\begin{equation}
+    \bar{\mathbf{F}}^d = \left\{\max(\tilde{\mathbf{F}}_1 \odot \mathbf{M}^{drop}_1),\ \ldots,\ \max(\tilde{\mathbf{F}}_L \odot \mathbf{M}^{drop}_L)\right\}
+    \label{eq:channel_sep}
+\end{equation}
+
+trong đó $\mathbf{M}^{drop}$ là channel drop mask với drop rate $10/73$ -- buộc model không phụ thuộc vào số kênh cố định. Channel-diverse loss buộc mask của các biểu cảm khác nhau phải khác nhau tối đa:
+
+\begin{equation}
+    l_{div} = 1 - \frac{1}{Nc} \sum_{i=1}^{N} \sum_{j=1}^{L} \tilde{\mathbf{F}}_{max_{ij}}
+    \label{eq:div_loss}
+\end{equation}
+
+Tổng loss training kết hợp ba thành phần:
+
+\begin{equation}
+    l_{train} = l_{cls} + \lambda\, l_{sep} + \beta\, l_{div}, \quad \lambda=1.5,\ \beta=5
+    \label{eq:total_loss}
+\end{equation}
+
+Sau training, chỉ giữ module tính $l_{cls}$ để inference -- $l_{sep}$ và $l_{div}$ chỉ dùng trong training để regularize.
+
+\subsection{Thực nghiệm -- \textit{Result}}
+
+\textbf{Datasets.} 5 dataset FER với đặc điểm khác nhau:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Dataset} & \textbf{Train} & \textbf{Test} & \textbf{Đặc điểm} \\ \hline
+RAF-DB       & 12,271  & 3,068  & In-the-wild, chú thích bởi 40 coders \\ \hline
+FERPlus      & 28,709  & 3,589  & Label phân phối từ crowd-sourcing \\ \hline
+AffectNet    & 286,564 & 4,000  & Lớn nhất, label nhiễu cao \\ \hline
+SFEW2.0      & 958     & 372    & Nhỏ nhất, ảnh chất lượng thấp \\ \hline
+MMA          & 92,968  & 17,356 & Đa số người Âu-Mỹ \\ \hline
+\end{tabular}
+\caption{Tổng hợp 5 dataset FER được dùng trong thực nghiệm CAFE}
+\label{tab:datasets}
+\end{table}
+
+\textbf{Kết quả chính -- Generalization ability.}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Phương pháp} & \textbf{Train} & \textbf{FERPlus} & \textbf{AffectNet} & \textbf{SFEW} & \textbf{MMA} & \textbf{Mean} \\ \hline
+SCN (CVPR2020)    & RAF-DB & 58.37 & 42.85 & 44.89 & 36.52 & 53.99 \\
+RUL (NeurIPS2021) & RAF-DB & 57.89 & 43.82 & 46.91 & 37.11 & 54.88 \\
+EAC (ECCV2022)    & RAF-DB & 54.38 & 43.91 & 43.39 & 37.27 & 53.70 \\
+OFER (ICCV2023)   & RAF-DB & 53.90 & 42.73 & 43.88 & 36.43 & 53.20 \\
+\textbf{CAFE (2024)} & RAF-DB & \textbf{73.16} & \textbf{45.86} & \textbf{52.86} & \textbf{56.80} & \textbf{63.48} \\ \hline
+\end{tabular}
+\caption{So sánh khả năng generalization trên unseen test sets (train trên RAF-DB). CAFE vượt trội với biên độ lớn, đặc biệt FERPlus (+18.78\%) và MMA (+19.53\%).}
+\label{tab:main_results}
+\end{table}
+
+\textbf{Ablation study.}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Mask} & \textbf{Sep.} & \textbf{Div.} & \textbf{FERPlus} & \textbf{AffectNet} & \textbf{SFEW} & \textbf{Mean} \\ \hline
+  &   &   & 58.05 & 43.25 & 42.76 & 46.67 \\
+\cmark &   &   & 70.90 & 43.77 & 51.63 & 55.49 \quad ($+$8.82) \\
+\cmark & \cmark &   & 72.01 & 45.17 & 53.31 & 56.80 \quad ($+$1.31) \\
+\cmark & \cmark & \cmark & \textbf{73.16} & \textbf{45.86} & \textbf{52.86} & \textbf{57.17} \quad ($+$0.37) \\ \hline
+\end{tabular}
+\caption{Ablation study: sigmoid mask là thành phần đóng góp lớn nhất (+8.82\%), separation và diverse loss cải thiện thêm từng bước.}
+\label{tab:ablation}
+\end{table}
+
+So sánh với CLIP+Finetune (baseline dùng CLIP fixed + FC layer, cùng số trainable params với CAFE): CAFE đạt 63.48\% vs 55.73\% mean accuracy -- chứng minh hiệu năng đến từ \textit{thiết kế phương pháp}, không đơn thuần từ việc dùng CLIP.
+
+\subsection{Phân tích và Đánh giá -- \textit{Limitation}}
+
+\textbf{Mối liên hệ kỹ thuật với chương sách.} Chương sách dùng Gabor wavelets -- handcrafted features dựa trên tri thức sinh học thị giác. CAFE dùng CLIP -- learned features từ dữ liệu khổng lồ. Cả hai đều nhằm trích xuất đặc trưng có khả năng generalize, nhưng theo hai triết lý trái ngược: \textit{``thiết kế để tổng quát''} vs. \textit{``học để tổng quát''}. Câu hỏi mở \#5 của chương sách (nhận dạng in-the-wild) chính xác là vấn đề CAFE giải quyết -- sau 13 năm.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{5cm}|p{5cm}|}
+\hline
+\textbf{Khía cạnh} & \textbf{Chương sách (2011)} & \textbf{CAFE (2024)} \\ \hline
+Feature extraction & Handcrafted: Gabor + geometric & Learned: CLIP ViT-B/32 \\ \hline
+Face localization & Viola-Jones, AAM, 3D model & Implicit qua CLIP encoder \\ \hline
+Classifier & NN, SVM, HMM & ResNet-18 + sigmoid mask \\ \hline
+Temporal info & HMM (sequence-based) & Không (static images only) \\ \hline
+Dataset & Nhỏ, lab-controlled & Lớn, in-the-wild \\ \hline
+Vấn đề target & AU recognition & Zero-shot generalization \\ \hline
+\end{tabular}
+\caption{So sánh tổng quát giữa phương pháp chương sách và CAFE}
+\label{tab:comparison}
+\end{table}
+
+\textbf{Điểm mạnh kỹ thuật của CAFE.}
+\begin{enumerate}
+    \item Giải quyết được zero-shot generalization một cách có hệ thống mà không cần dữ liệu target domain
+    \item Tận dụng large model (CLIP) hiệu quả: đóng băng để giữ generalization, chỉ train mask learning
+    \item Thiết kế đơn giản, interpretable: sigmoid mask có thể visualize và giải thích trực quan
+    \item Flexible: hoạt động với nhiều backbone (MobileNet, ResNet-18, ResNet-50)
+\end{enumerate}
+
+\textbf{Hạn chế và vấn đề chưa giải quyết.}
+\begin{enumerate}
+    \item \textbf{Chỉ xử lý ảnh tĩnh:} Không khai thác temporal dynamics -- điều chương sách đã nhấn mạnh từ 2011 qua HMM
+    \item \textbf{AffectNet accuracy vẫn thấp (45.86\%):} Do label noise cao -- vấn đề ground truth reliability chưa được giải quyết
+    \item \textbf{Giới hạn ở 7 biểu cảm cơ bản:} Chưa xử lý được AU-level hay compound expressions
+    \item \textbf{Phụ thuộc vào CLIP bias:} Large models có bias về chủng tộc, văn hóa -- CAFE thừa hưởng bias này
+    \item \textbf{Chưa xử lý occlusion và extreme pose:} Thách thức cơ bản từ chương sách vẫn còn nguyên
+\end{enumerate}
+
+\textbf{Đề xuất hướng cải tiến.}
+\begin{enumerate}
+    \item Kết hợp CAFE với LSTM hoặc Temporal Transformer để xử lý video sequence
+    \item Áp dụng channel separation cho 44 AU thay vì 7 lớp biểu cảm để đạt mức mô tả chi tiết hơn
+    \item Thay CLIP bằng face-specific foundation model (ArcFace, FaRL) cho đặc trưng khuôn mặt tốt hơn
+    \item Kết hợp với noise-robust label learning để cải thiện trên dataset nhiễu như AffectNet
+\end{enumerate}
+
+% ============= SECTION 5: PHẦN THỰC HÀNH + DEMO =============
+\section{PHẦN THỰC HÀNH VÀ DEMO MINH HỌA}
+
+\subsection{Phân tích kỹ thuật từ mã nguồn}
+
+% TODO: Phân tích repo https://github.com/zyh-uaiaaaa/Generalizable-FER
+% Gợi ý các thành phần cần phân tích:
+% - Cách load CLIP và freeze weights
+% - Cách implement sigmoid mask learning
+% - Cách implement channel separation module
+% - Channel-diverse loss function
+% - Training loop
+
+[Nhóm điền phân tích mã nguồn tại đây.]
+
+\subsection{Thiết lập thực nghiệm và Kết quả}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Cấu hình} & \textbf{Giá trị} \\
+\midrule
+Backbone & ResNet-18 \\
+CLIP model & ViT-B/32 (visual encoder only, fixed) \\
+Learning rate & 0.0002 \\
+Optimizer & Adam (weight decay $10^{-4}$) \\
+LR scheduler & ExponentialLR ($\gamma = 0.9$) \\
+$\lambda$ (separation loss weight) & 1.5 \\
+$\beta$ (diverse loss weight) & 5.0 \\
+Hardware & \\ % <-- ĐIỀN THÔNG TIN PHẦN CỨNG \\
+\bottomrule
+\end{tabular}
+\caption{Thiết lập thực nghiệm}
+\label{tab:exp_setup}
+\end{table}
+
+% TODO: Điền bảng so sánh kết quả thực nghiệm thực tế của nhóm với kết quả bài báo
+% Gợi ý format: 2 cột -- kết quả bài báo vs kết quả nhóm chạy, giải thích sai khác
+
+\subsection{Demo minh họa -- Nhận dạng biểu cảm khuôn mặt}
+
+Demo được thực hiện bằng cách chạy chương trình nhận dạng biểu cảm khuôn mặt real-time sử dụng webcam, áp dụng model FER đã được huấn luyện để phân loại 7 biểu cảm cơ bản trên khuôn mặt người. Hình \ref{fig:demo_results} minh họa kết quả nhận dạng cho 6 biểu cảm cảm xúc:
+
+\begin{figure}[H]
+    \centering
+    % Layout 2 hàng x 3 cột -- 6 biểu cảm
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{demo_disgust.png}
+        \caption{Disgust -- Ghê tởm}
+        \label{fig:demo_disgust}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{demo_fear.png}
+        \caption{Fear -- Sợ hãi}
+        \label{fig:demo_fear}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{demo_joy.png}
+        \caption{Joy -- Vui mừng}
+        \label{fig:demo_joy}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{demo_surprise.png}
+        \caption{Surprise -- Ngạc nhiên}
+        \label{fig:demo_surprise}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{demo_sadness.png}
+        \caption{Sadness -- Buồn bã}
+        \label{fig:demo_sadness}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{demo_anger.png}
+        \caption{Anger -- Tức giận}
+        \label{fig:demo_anger}
+    \end{subfigure}
+
+    \caption{Kết quả demo nhận dạng biểu cảm khuôn mặt real-time cho 6 biểu cảm cảm xúc cơ bản. Mỗi ảnh hiển thị khuôn mặt người thực hiện biểu cảm tương ứng cùng nhãn dự đoán của hệ thống.}
+    \label{fig:demo_results}
+\end{figure}
+
+
+% ============= SECTION 4: KẾT LUẬN =============
+\section{KẾT LUẬN}
+
+Qua nghiên cứu Chapter 19 của \textit{Handbook of Face Recognition} và bài báo CAFE (2024), nhóm rút ra những nhận định sau:
+
+Chương sách cung cấp nền tảng lý thuyết vững chắc cho bài toán FER: từ hệ thống FACS để mô tả biểu cảm ở mức Action Unit, đến pipeline AFEA 3 bước (thu nhận khuôn mặt -- trích xuất đặc trưng -- nhận dạng), đến các kỹ thuật cụ thể như Gabor wavelets và HMM. Dù các kỹ thuật này đã được thay thế bởi deep learning, triết lý thiết kế và không gian vấn đề mà chương sách xác định vẫn còn nguyên giá trị.
+
+Bài báo CAFE giải quyết một trong những câu hỏi mở quan trọng nhất mà chương sách đặt ra -- nhận dạng biểu cảm trong điều kiện thực tế -- bằng một cách tiếp cận mới: thay vì tìm cách adapt sang domain mới, hãy xây dựng đặc trưng đủ tổng quát ngay từ đầu. Kết quả vượt trội của CAFE trên tất cả cặp train/test cross-domain cho thấy hướng đi này có tiềm năng lớn.
+
+Tuy nhiên, nhiều câu hỏi từ năm 2011 vẫn chưa được giải đáp hoàn toàn: nhận dạng AU mịn hơn, xử lý biểu cảm tự nhiên trong video, và ground truth đáng tin cậy vẫn là những thách thức mở cho tương lai.
+
+
+% ============= TÀI LIỆU THAM KHẢO =============
+\newpage
+\section*{TÀI LIỆU THAM KHẢO}
+\addcontentsline{toc}{section}{Tài liệu tham khảo}
+
+\begin{enumerate}
+    \item Tian, Y., Kanade, T., \& Cohn, J. F. (2011). \textit{Facial Expression Recognition}. In S. Z. Li \& A. K. Jain (Eds.), \textit{Handbook of Face Recognition} (2nd ed., Chapter 19, pp. 487--519). Springer.
+
+    \item Zhang, Y., Zheng, X., Liang, C., Hu, J., \& Deng, W. (2024). \textit{Generalizable Facial Expression Recognition}. arXiv:2408.10614.
+
+    \item Ekman, P., \& Friesen, W. (1978). \textit{The Facial Action Coding System: A Technique for the Measurement of Facial Movement}. Consulting Psychologists Press.
+
+    \item Viola, P., \& Jones, M. (2001). Robust real-time object detection. \textit{International Workshop on Statistical and Computational Theories of Vision}.
+
+    \item Radford, A., Kim, J. W., Hallacy, C., et al. (2021). Learning transferable visual models from natural language supervision. \textit{ICML}.
+
+    \item He, K., Zhang, X., Ren, S., \& Sun, J. (2016). Deep residual learning for image recognition. \textit{CVPR}.
+
+    \item Wang, K., Peng, X., Yang, J., Lu, S., \& Qiao, Y. (2020). Suppressing uncertainties for large-scale facial expression recognition (SCN). \textit{CVPR}.
+
+    \item Zhang, Y., Wang, C., Ling, X., \& Deng, W. (2022). Learn from all: Erasing attention consistency for noisy label facial expression recognition (EAC). \textit{ECCV}.
+
+    \item Kanade, T., Cohn, J., \& Tian, Y. L. (2000). Comprehensive database for facial expression analysis. \textit{Proceedings of FG2000}.
+    \label{kanade2000}
+\end{enumerate}
+
+\end{document}

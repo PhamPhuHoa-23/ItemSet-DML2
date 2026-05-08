@@ -1,0 +1,1977 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============= PACKAGES =============
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T5]{fontenc}
+
+\usepackage[left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\graphicspath{{figures}}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\setlist[enumerate]{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+\setlist[itemize]{itemsep=2pt, parsep=0pt, topsep=4pt, partopsep=0pt}
+
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{hyperref}
+\usepackage{url}
+
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{titlesec}
+\usepackage{pifont}
+\usepackage{tikz}
+\usetikzlibrary{trees, arrows.meta, positioning, shapes.geometric}
+\usepackage[acronym, toc, nonumberlist]{glossaries}
+\makeglossaries
+
+% ============= GLOSSARY ENTRIES =============
+\newglossaryentry{fim}{
+    name={FIM},
+    description={\textit{Frequent Itemset Mining} (Khai thác tập phổ biến): bài toán tìm tất cả các tập mục xuất hiện với tần số không thấp hơn ngưỡng \texttt{minsup} trong cơ sở dữ liệu giao dịch}
+}
+\newglossaryentry{transaction}{
+    name={transaction},
+    description={(giao dịch): một bộ ghi trong database, biểu diễn một tập hợp các item mà khách hàng mua trong một lần}
+}
+\newglossaryentry{txdb}{
+    name={transaction database},
+    description={(cơ sở dữ liệu giao dịch): tập hợp $\mathcal{D} = \{T_1, T_2, \ldots, T_n\}$ trong đó mỗi transaction $T_i \subseteq \mathcal{I}$}
+}
+\newglossaryentry{itemset}{
+    name={itemset},
+    description={(tập mục): một tập hợp con bất kỳ các item $X \subseteq \mathcal{I}$}
+}
+\newglossaryentry{support}{
+    name={support},
+    description={(độ hỗ trợ): số transaction chứa itemset $X$; $\mathrm{sup}(X) = |\{T \in \mathcal{D} : X \subseteq T\}|$}
+}
+\newglossaryentry{minsup}{
+    name={minimum support},
+    description={(ngưỡng hỗ trợ tối thiểu, viết tắt: minsup): ngưỡng $\sigma$ do người dùng đặt ra; một itemset là frequent khi $\mathrm{sup}(X) \geq \sigma$}
+}
+\newglossaryentry{closed}{
+    name={closed itemset},
+    description={(tập đóng): itemset $X$ mà không tồn tại $Y \supset X$ với $\mathrm{sup}(Y) = \mathrm{sup}(X)$}
+}
+\newglossaryentry{maximal}{
+    name={maximal itemset},
+    description={(tập tối đại): frequent itemset $X$ mà không tồn tại $Y \supset X$ là frequent}
+}
+\newglossaryentry{tidset}{
+    name={TID-set},
+    description={\textit{Transaction ID set}: tập các chỉ số giao dịch chứa một tập mục; $\mathcal{T}(X) = \{i : X \subseteq T_i\}$}
+}
+\newglossaryentry{bitarray}{
+    name={BitArray},
+    description={Mảng bit: biểu diễn tập TID-set dưới dạng chuỗi bit nhị phân, cho phép tính giao bằng phép AND và đếm bằng POPCNT phần cứng}
+}
+\newglossaryentry{dfs}{
+    name={DFS},
+    description={\textit{Depth-First Search} (Tìm kiếm theo chiều sâu): chiến lược duyệt không gian định lệt theo chiều sâu, sử dụng ít bộ nhớ hơn BFS}
+}
+\newglossaryentry{spmf}{
+    name={SPMF},
+    description={\textit{Sequential Pattern Mining Framework}: thư viện khai phá mẫu chuỗi và tập phổ biến viết bằng Java, dùng làm chuẩn tham chiếu}
+}
+\newglossaryentry{lcmfreq}{
+    name={LCMFreq},
+    description={Thuật toán khai thác tập phổ biến dựa trên \textit{Linear time Closed itemset Miner} (Uno et al., 2004), sử dụng TID-set theo chiều dọc và DFS}
+}
+\newglossaryentry{apriori}{
+    name={Apriori},
+    description={Thuật toán FIM kinh điển (Agrawal \& Srikant, 1994), sinh ứng viên theo chiều rộng và cắt tỉa bằng tính chất Apriori}
+}
+\newglossaryentry{fpgrowth}{
+    name={FP-Growth},
+    description={Thuật toán FIM dựa trên cấu trúc FP-tree (Han et al., 2000), không sinh ứng viên tường minh}
+}
+\newglossaryentry{eclat}{
+    name={Eclat},
+    description={Thuật toán FIM dựa trên định dạng dọc (\textit{vertical data format}) và giao các TID-set (Zaki et al., 1997)}
+}
+\newglossaryentry{antimonotone}{
+    name={anti-monotone property},
+    description={(tính chất đơn điệu giảm / downward closure): nếu $X$ là frequent thì mọi tập con $Y \subseteq X$ đều frequent; nếu $Y$ không frequent thì mọi superset $X \supset Y$ cũng không frequent}
+}
+\newglossaryentry{assoc}{
+    name={association rule},
+    description={(luật kết hợp): biểu thức dạng $X \Rightarrow Y$ với $X \cap Y = \emptyset$, thể hiện mối quan hệ giữa các itemset trong transaction}
+}
+\newglossaryentry{confidence}{
+    name={confidence},
+    description={(độ tin cậy): $\mathrm{conf}(X \Rightarrow Y) = \mathrm{sup}(X \cup Y) / \mathrm{sup}(X)$}
+}
+\newglossaryentry{lift}{
+    name={lift},
+    description={Thước đo luật kết hợp; $\mathrm{lift}(X \Rightarrow Y) = \mathrm{conf}(X \Rightarrow Y) / \mathrm{sup\_rel}(Y)$; lift $> 1$ cho thấy sự tương quan dương}
+}
+\newglossaryentry{mba}{
+    name={Market Basket Analysis},
+    description={(phân tích giỏ hàng): ứng dụng FIM phân tích hành vi mua sắm, tìm các sản phẩm thường được mua cùng nhau}
+}
+\newglossaryentry{popcnt}{
+    name={POPCNT},
+    description={\textit{Population Count}: lệnh CPU đếm số bit 1 trong một từ nhị phân; tương ứng với tính độ hỗ trợ các BitArray TID-set}
+}
+\newglossaryentry{simd}{
+    name={SIMD},
+    description={\textit{Single Instruction Multiple Data}: kiến trúc CPU thực hiện một lệnh trên nhiều phần tử dữ liệu đồng thời; phép AND bit-wise trên BitArray tận dụng SIMD}
+}
+\newglossaryentry{dense}{
+    name={dense dataset},
+    description={(tập dữ liệu dày đặc): dataset có độ dài transaction trung bình cao và nhiều frequent itemset ở mọi mức minsup}
+}
+\newglossaryentry{sparse}{
+    name={sparse dataset},
+    description={(tập dữ liệu thưa): dataset có độ dài transaction trung bình thấp, ít frequent itemset, thường gặp trong dữ liệu thương mại thực}
+}
+
+% ============= COLOR DEFINITIONS =============
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{hcmublue}{RGB}{0,51,102}
+
+% ============= CUSTOM COMMANDS =============
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\supp}{\mathrm{sup}}
+\newcommand{\conf}{\mathrm{conf}}
+
+% ============= CODE STYLE =============
+\lstdefinestyle{juliastyle}{
+    language=Python,
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen}\itshape,
+    keywordstyle=\color{hcmublue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    rulecolor=\color{codegray},
+    morekeywords={function,end,for,in,if,return,struct,true,false,push!,filter,sort,count,falses,trues,haskey,Dict,Vector,Int,BitArray,ceil,length,isempty}
+}
+\lstset{style=juliastyle}
+
+% ============= HYPERREF =============
+\hypersetup{
+    colorlinks=true,
+    linkcolor=hcmublue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=hcmublue,
+    pdftitle={Bao cao Do an 2 - Khai Thac Tap Pho Bien},
+    pdfauthor={Nhom sinh vien HCMUS},
+    bookmarksnumbered=true,
+    bookmarksopen=true
+}
+
+% ============= HEADER AND FOOTER =============
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Khai thác Dữ liệu và Ứng dụng -- CSC14004}
+\fancyhead[R]{\small LCMFreq: Khai thác Tập Phổ Biến}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% ============= SECTION FORMATTING =============
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{hcmublue}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{hcmublue}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{hcmublue}}
+  {\thesubsubsection}{1em}{}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% ============= THEOREM STYLES =============
+\theoremstyle{definition}
+\newtheorem{definition}{Định nghĩa}[section]
+\newtheorem{property}{Tính chất}[section]
+\newtheorem{example}{Ví dụ}[section]
+
+% ============= BEGIN DOCUMENT =============
+\begin{document}
+
+% ============= TITLE PAGE =============
+\begin{titlepage}
+    \centering
+    \vspace*{0.2cm}
+
+    {\large \textbf{\textcolor{hcmublue}{ĐẠI HỌC QUỐC GIA TP. HỒ CHÍ MINH}}}\\[0.2cm]
+    {\large \textbf{\textcolor{hcmublue}{TRƯỜNG ĐẠI HỌC KHOA HỌC TỰ NHIÊN}}}\\[0.2cm]
+    {\large \textbf{\textcolor{hcmublue}{KHOA CÔNG NGHỆ THÔNG TIN}}}\\[0.4cm]
+    % Uncomment khi có logo.png trong cùng thư mục
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.25\textwidth]{logo.png}
+    \end{figure}
+
+    \rule{\linewidth}{0.5mm}\\[0.5cm]
+    {\LARGE \textbf{\textcolor{hcmublue}{BÁO CÁO ĐỒ ÁN 2}}}\\[0.4cm]
+    {\Large \textbf{KHAI THÁC TẬP PHỔ BIẾN}}\\[0.2cm]
+    {\large \textit{Frequent Itemset Mining -- Nghiên cứu, Cài đặt \& Đánh giá}}\\[0.3cm]
+    {\large \textbf{Thuật toán: LCMFreq (Uno et al., 2004)}}\\[0.2cm]
+    {\normalsize \textit{Ngôn ngữ cài đặt: Julia 1.12 (BitArray tidset optimization)}}\\[0.4cm]
+    \rule{\linewidth}{0.5mm}\\[1.0cm]
+
+    \begin{tabular}{rl}
+        \textbf{Môn học:}  & CSC14004 -- Khai Thác Dữ Liệu và Ứng Dụng \\[0.3cm]
+        \textbf{Lớp:}      & \textit{CQ2023/24} \\[0.3cm]
+        \textbf{GVHD:}     & GS.TS Lê Hoài Bắc \\[0.1cm]
+                           & ThS. Nguyễn Thị Thu Hằng \\[0.1cm]
+                           & ThS. Nguyễn Ngọc Đức \\[0.1cm]
+                           & ThS. Lê Nhựt Nam \\
+    \end{tabular}
+
+    \vfill
+
+    \begin{tabular}{c l l}
+        \toprule
+        \textbf{STT} & \textbf{Họ và Tên} & \textbf{MSSV} \\
+        \midrule
+        1 & Phạm Phú Hòa        & 23122030 \\
+        2 & Huỳnh Trung Kiệt    & 23122039 \\
+        3 & Đào Sỹ Duy Minh     & 23122041 \\
+        4 & Trần Chí Nguyên     & 23122044 \\
+        5 & Nguyễn Lâm Phú Quý  & 23122048 \\
+        \bottomrule
+    \end{tabular}
+
+    \vfill
+
+    % {\large Tp. Hồ Chí Minh, tháng 5 năm 2026}
+\end{titlepage}
+
+% ============= ABSTRACT =============
+\begin{abstract}
+Báo cáo này trình bày nghiên cứu và cài đặt thuật toán \textbf{LCMFreq} cho bài toán \gls{fim}.
+LCMFreq, được đề xuất bởi Uno, Kiyomi và Arimura (2004), sử dụng \gls{tidset} theo định dạng dọc (vertical data format) và tìm kiếm theo chiều sâu (\gls{dfs}) để liệt kê toàn bộ các \gls{itemset} phổ biến mà không sinh ứng viên (candidate) tường minh.
+
+Cài đặt của nhóm được viết bằng ngôn ngữ Julia 1.12 với tối ưu hóa then chốt: thay thế TID-set dạng danh sách số nguyên bằng \gls{bitarray}, cho phép tính giao bằng phép AND theo bit (\gls{simd}) và đếm \gls{support} bằng lệnh \gls{popcnt} phần cứng. Kết quả thực nghiệm trên 9 tập dữ liệu chuẩn (Chess, Connect, Mushroom, Pumsb, Accidents, Retail, T10I4D100K, T40I10D100K, Kosarak) cho thấy kết quả khớp 100\% với \gls{spmf} và tốc độ vượt trội từ $3{,}5\times$ đến $141\times$ so với SPMF Java, đồng thời tiết kiệm bộ nhớ tới $27\times$ so với cài đặt cơ sở (baseline).
+
+\textbf{Từ khóa:} Frequent Itemset Mining, LCMFreq, TID-set, BitArray, Julia, SPMF, Khai thác dữ liệu.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+\listoftables
+\newpage
+\listoffigures
+\newpage
+\printglossary[title={Danh sách Thuật ngữ và Ký hiệu}, toctitle={Danh sách Thuật ngữ}]
+\newpage
+
+% ============================================================
+\section{THÔNG TIN NHÓM VÀ PHÂN CÔNG CÔNG VIỆC}
+% ============================================================
+
+\subsection{Thông tin các thành viên}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{c l l c}
+    \toprule
+    \textbf{MSSV} & \textbf{Họ và Tên} & \textbf{Email} & \textbf{Vai trò} \\
+    \midrule
+    23122030 & Phạm Phú Hòa       & 23122030@student.hcmus.edu.vn & Nhóm trưởng \\
+    23122039 & Huỳnh Trung Kiệt   & 23122039@student.hcmus.edu.vn & Thành viên \\
+    23122041 & Đào Sỹ Duy Minh    & 23122041@student.hcmus.edu.vn & Thành viên \\
+    23122044 & Trần Chí Nguyên    & 23122044@student.hcmus.edu.vn & Thành viên \\
+    23122048 & Nguyễn Lâm Phú Quý & 23122048@student.hcmus.edu.vn & Thành viên \\
+    \bottomrule
+\end{tabular}
+\caption{Thông tin các thành viên nhóm}
+\label{tab:team_info}
+\end{table}
+
+\subsection{Phân công công việc}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{l X c}
+    \toprule
+    \textbf{Thành viên} & \textbf{Công việc} & \textbf{Hoàn thành} \\
+    \midrule
+    Phạm Phú Hòa       & Nghiên cứu thuật toán LCMFreq, viết Chương 1 (lý thuyết) và Chương 2 (ví dụ tay) & \cmark \\[4pt]
+    Huỳnh Trung Kiệt   & Cài đặt thuật toán baseline (vector tidset), viết Chương 3 phần baseline & \cmark \\[4pt]
+    Đào Sỹ Duy Minh    & Cài đặt tối ưu hóa BitArray, kiểm thử đơn vị, viết Chương 3 phần tối ưu & \cmark \\[4pt]
+    Trần Chí Nguyên    & Thiết kế và chạy thực nghiệm, vẽ biểu đồ, viết Chương 4 & \cmark \\[4pt]
+    Nguyễn Lâm Phú Quý & Xây dựng ứng dụng phân tích giỏ hàng, viết Chương 5, hoàn thiện báo cáo & \cmark \\
+    \bottomrule
+\end{tabularx}
+\caption{Phân công công việc}
+\label{tab:work_dist}
+\end{table}
+
+\subsection{Tự đánh giá mức độ hoàn thành}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{c p{10cm} c}
+    \toprule
+    \textbf{STT} & \textbf{Yêu cầu} & \textbf{Hoàn thành} \\
+    \midrule
+    1  & Định nghĩa hình thức FIM, tính chất Apriori & \cmark \\
+    2  & Phân tích thuật toán LCMFreq (ý tưởng, cấu trúc, giả mã, độ phức tạp) & \cmark \\
+    3  & Ví dụ 1: cơ sở, step-by-step với cross-check & \cmark \\
+    4  & Ví dụ 2: tình huống đặc biệt (pruning sớm) & \cmark \\
+    5  & Cài đặt baseline (Vector tidset) & \cmark \\
+    6  & Tối ưu hóa BitArray -- đo lường cải thiện & \cmark \\
+    7  & Unit test tự động (\texttt{tests/test\_correctness.jl}) & \cmark \\
+    8  & Thực nghiệm đầy đủ (correctness, runtime, memory, scalability, txlen) & \cmark \\
+    9  & Ứng dụng phân tích giỏ hàng với tập Retail & \cmark \\
+    10 & Báo cáo \LaTeX{} chi tiết & \cmark \\
+    \bottomrule
+\end{tabular}
+\caption{Tự đánh giá mức độ hoàn thành các yêu cầu}
+\label{tab:self_eval}
+\end{table}
+
+
+% ============================================================
+\section{NỀN TẢNG LÝ THUYẾT}
+% ============================================================
+
+\subsection{Bài toán Frequent Itemset Mining}
+
+\subsubsection{Các định nghĩa hình thức}
+
+\begin{definition}[Transaction Database]
+Cho $\mathcal{I} = \{i_1, i_2, \ldots, i_m\}$ là tập hữu hạn các \textbf{item}. Một \gls{txdb} là tập $\mathcal{D} = \{T_1, T_2, \ldots, T_n\}$ trong đó mỗi transaction $T_k \subseteq \mathcal{I}$, được gán định danh duy nhất $\mathrm{tid}(T_k) = k$.
+\end{definition}
+
+\begin{definition}[Support]
+Cho \gls{itemset} $X \subseteq \mathcal{I}$. \textbf{Support tuyệt đối} của $X$ là:
+\[
+    \supp(X) = \bigl|\{T \in \mathcal{D} : X \subseteq T\}\bigr|
+\]
+\textbf{Support tương đối} (relative support) là:
+\[
+    \supp_{\mathrm{rel}}(X) = \frac{\supp(X)}{|\mathcal{D}|}
+\]
+\end{definition}
+
+\begin{definition}[Frequent Itemset]
+Cho ngưỡng \gls{minsup} $\sigma \in \mathbb{Z}^{+}$. Itemset $X$ là \textbf{frequent} nếu:
+\[
+    \supp(X) \geq \sigma
+\]
+Bài toán \gls{fim} yêu cầu tìm tất cả frequent itemset: $\mathcal{F} = \{X \subseteq \mathcal{I} : \supp(X) \geq \sigma\}$.
+\end{definition}
+
+\begin{definition}[Closed và Maximal Itemset]
+Một frequent itemset $X$ được gọi là \textbf{\gls{closed}} nếu không tồn tại $Y \supset X$ sao cho $\supp(Y) = \supp(X)$. $X$ được gọi là \textbf{\gls{maximal}} nếu không tồn tại $Y \supset X$ là frequent.
+
+Quan hệ bao hàm: $\mathcal{F}_{\max} \subseteq \mathcal{F}_{\mathrm{closed}} \subseteq \mathcal{F}$, trong đó $\mathcal{F}_{\max}$ là tập các maximal itemset và $\mathcal{F}_{\mathrm{closed}}$ là tập các closed itemset.
+\end{definition}
+
+\begin{definition}[TID-set]
+\textbf{TID-set} (hay tidset) của itemset $X$ là:
+\[
+    \mathcal{T}(X) = \{k \in \{1,\ldots,n\} : X \subseteq T_k\}
+\]
+Khi đó $\supp(X) = |\mathcal{T}(X)|$. Với hai itemset $P$ và $\{e\}$ rời nhau, $\mathcal{T}(P \cup \{e\}) = \mathcal{T}(P) \cap \mathcal{T}(\{e\})$.
+\end{definition}
+
+\subsubsection{Anti-Monotone Property (Downward Closure)}
+
+\begin{property}[Anti-monotone property]
+\label{prop:antimonotone}
+Với mọi $Y \subseteq X \subseteq \mathcal{I}$:
+\[
+    \supp(X) \leq \supp(Y)
+\]
+\end{property}
+
+\begin{proof}
+Theo định nghĩa, $\mathcal{T}(X) = \{T \in \mathcal{D} : X \subseteq T\}$ và $\mathcal{T}(Y) = \{T \in \mathcal{D} : Y \subseteq T\}$. Vì $Y \subseteq X$, nên $X \subseteq T$ kéo theo $Y \subseteq T$, tức là $\mathcal{T}(X) \subseteq \mathcal{T}(Y)$. Do đó $\supp(X) = |\mathcal{T}(X)| \leq |\mathcal{T}(Y)| = \supp(Y)$.
+\end{proof}
+
+\textbf{Hệ quả (cắt tỉa Apriori).} Nếu $\supp(X) < \sigma$ thì với mọi $Z \supset X$, $\supp(Z) \leq \supp(X) < \sigma$, nghĩa là $Z$ không thể là frequent. Anti-monotone property cho phép loại bỏ toàn bộ cây con candidate của $X$ mà không cần kiểm tra.
+
+\subsection{Phân tích Thuật toán LCMFreq theo Bài báo Gốc}
+
+\subsubsection{Bối cảnh Lịch sử và Hạn chế các Thuật toán Trước}
+
+\gls{lcmfreq} được đề xuất bởi Uno, Kiyomi và Arimura trong bài báo \textit{``LCM ver.2: Efficient Mining Algorithms for Frequent/Closed/Maximal Itemsets''} (FIMI 2004)~\cite{uno2004}. Tên LCM là viết tắt của \textit{Linear time Closed itemset Miner}; LCMfreq là biến thể liệt kê \textbf{tất cả} frequent itemset (không chỉ closed itemset).
+
+Các thuật toán tiền nhiệm thuộc hai nhóm chính:
+
+\begin{itemize}
+    \item \textbf{Nhóm Apriori (breadth-first)}: \gls{apriori} (1994) và các biến thể sinh candidate theo từng cấp $k$, quét toàn bộ database để đếm support ở mỗi cấp. Chi phí quét đa lượt và lưu trữ candidate tăng nhanh khi minsup thấp hoặc dữ liệu dense. \gls{fpgrowth} (2000) dùng FP-tree để nén database, tránh quét lại, nhưng cây tốn bộ nhớ và khó cập nhật động.
+
+    \item \textbf{Nhóm Backtracking (DFS)}: \gls{eclat} (1997) dùng định dạng dọc (vertical) -- lưu tidset $\mathcal{T}(e)$ cho từng item $e$. Support của itemset tính bằng giao các tidset, không quét lại database. Hạn chế: với dense dataset, mỗi tidset có thể lên tới $n$ phần tử, tốn nhiều bộ nhớ.
+\end{itemize}
+
+Theo Uno et al.~\cite{uno2004}: \textit{``Backtracking algorithms use less memory since they keep only the current solution. Backtracking algorithms need no computation for maintaining previously obtained itemsets, so the computation time of backtracking algorithms is generally short.''} LCMfreq chọn khung backtracking và phát triển thêm hai kỹ thuật then chốt: \\
+\begin{center}
+    ``\textbf{OccurrenceDeliver} và \textbf{HypercubeDecomposition}.''
+\end{center}
+
+\subsubsection{Khung Thuật toán BackTracking}
+
+Theo bài báo gốc (Uno et al., 2004, Section 3.1), khung thuật toán backtracking cho FIM như sau: mỗi lần gọi đệ quy nhận một frequent itemset $P$ (nghiệm hiện tại) và thêm lần lượt từng item $e > \mathrm{tail}(P)$ vào $P$.
+
+\begin{algorithm}[H]
+\caption{BackTracking -- Khung cơ bản (Uno et al., 2004, Section 3.1)}
+\label{alg:backtracking}
+\begin{algorithmic}[1]
+\Require Frequent itemset hiện tại $P$
+\State Output $P$
+\For{mỗi item $e \in \mathcal{I}$, $e > \mathrm{tail}(P)$}
+    \If{$P \cup \{e\}$ là frequent}
+        \State \Call{BackTracking}{$P \cup \{e\}$}
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+Trong đó $\mathrm{tail}(P)$ là item có chỉ số lớn nhất trong $P$. Quy tắc ``chỉ thêm item lớn hơn tail'' đảm bảo mỗi frequent itemset được liệt kê đúng một lần, không trùng lặp. Khung này dùng \textbf{ít bộ nhớ hơn Apriori} vì chỉ giữ nghiệm hiện tại trên stack, không cần lưu toàn bộ candidate.
+
+\subsubsection{OccurrenceDeliver, Kỹ thuật Đếm Tần suất Hiệu quả}
+
+Bước tốn kém nhất của bất kỳ thuật toán FIM nào là \textbf{đếm support} (frequency counting). Các thuật toán Apriori dùng \textit{down project}: $\mathcal{T}(P) = \mathcal{T}(P_1) \cap \mathcal{T}(P_2)$ (tính giao hai tidset con). Chi phí là $O(|\mathcal{T}(P_1)| + |\mathcal{T}(P_2)|)$ cho mỗi candidate riêng lẻ.
+
+LCMfreq dùng kỹ thuật \textbf{OccurrenceDeliver} (Uno et al., 2004, Section 3.4): thay vì tính giao cho từng candidate $e$ riêng lẻ, thuật toán duyệt qua \textbf{một lần} toàn bộ các transaction trong $\mathcal{T}(P)$ và phân phối chúng vào các \textit{bucket} tương ứng với từng item $e > \mathrm{tail}(P)$.
+
+\begin{algorithm}[H]
+\caption{OccurrenceDeliver: Đếm support tất cả candidate cùng lúc (Uno et al., 2004, Section 3.4)}
+\label{alg:occdeliver}
+\begin{algorithmic}[1]
+\Require Database $\mathcal{D}$, frequent itemset hiện tại $P$
+\Ensure $\mathrm{Bucket}[e] = \mathcal{T}(P \cup \{e\})$ cho mọi item $e > \mathrm{tail}(P)$
+\State Khởi tạo $\mathrm{Bucket}[e] \gets \emptyset$ cho mọi item $e > \mathrm{tail}(P)$
+\For{mỗi transaction $t \in \mathcal{T}(P)$}
+    \For{mỗi item $e \in t$ với $e > \mathrm{tail}(P)$}
+        \State Thêm $t$ vào $\mathrm{Bucket}[e]$
+    \EndFor
+\EndFor
+\State \Return $\{\mathrm{Bucket}[e] : e > \mathrm{tail}(P)\}$
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Tại sao hiệu quả?} Sau khi chạy OccurrenceDeliver, $\mathrm{Bucket}[e] = \mathcal{T}(P \cup \{e\})$ cho mọi candidate $e$ cùng lúc, chỉ với một lần duyệt qua $\mathcal{T}(P)$. Chi phí là:
+\[
+    O\!\Bigl(\sum_{t \in \mathcal{T}(P)} |t \cap \{e : e > \mathrm{tail}(P)\}|\Bigr)
+    = O\!\Bigl(|\mathcal{T}(P)| + \sum_{e > \mathrm{tail}(P)} |\mathcal{T}(P \cup \{e\})|\Bigr)
+\]
+Phức tạp này nhỏ hơn down project vì tránh được chi phí lặp lại $|\mathcal{T}(P)|$ cho mỗi ứng viên.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.5\linewidth}{!}{%
+\begin{tikzpicture}[font=\small, >=latex]
+
+    % Header
+    \node[font=\bfseries\small] at (1.5, 6.0)
+        {$\mathcal{T}(P)$ với $P=\{A\}$};
+
+    % Transactions (cột trái)
+    \node[draw, rounded corners, fill=blue!10,
+          minimum width=3.2cm, minimum height=0.65cm]
+          (t1) at (1.5, 5.0) {$t_1 = \{A, B, C\}$};
+
+    \node[draw, rounded corners, fill=blue!10,
+          minimum width=3.2cm, minimum height=0.65cm]
+          (t3) at (1.5, 2.5) {$t_3 = \{A, C, D\}$};
+
+    \node[draw, rounded corners, fill=blue!10,
+          minimum width=3.2cm, minimum height=0.65cm]
+          (t5) at (1.5, 0.0) {$t_5 = \{A, B, D\}$};
+
+    % Bucket B (y=5.0)
+    \node[draw, fill=green!15,
+          minimum width=2.2cm, minimum height=0.9cm]
+          (bB) at (7.5, 5.0) {};
+    \node[font=\bfseries\scriptsize, above=0.12cm] at (bB.north)
+        {Bucket[$B$]};
+    \node[font=\scriptsize] at (7.5, 5.0) {$t_1,\; t_5$};
+    \node[font=\scriptsize, below=0.12cm] at (bB.south)
+        {$\mathrm{sup}(\{A,B\})=2$};
+
+    % Bucket C (y=2.5)  khoảng cách đủ xa so với B
+    \node[draw, fill=green!15,
+          minimum width=2.2cm, minimum height=0.9cm]
+          (bC) at (7.5, 2.5) {};
+    \node[font=\bfseries\scriptsize, above=0.12cm] at (bC.north)
+        {Bucket[$C$]};
+    \node[font=\scriptsize] at (7.5, 2.5) {$t_1,\; t_3$};
+    \node[font=\scriptsize, below=0.12cm] at (bC.south)
+        {$\mathrm{sup}(\{A,C\})=2$};
+
+    % Bucket D (y=0.0)
+    \node[draw, fill=green!15,
+          minimum width=2.2cm, minimum height=0.9cm]
+          (bD) at (7.5, 0.0) {};
+    \node[font=\bfseries\scriptsize, above=0.12cm] at (bD.north)
+        {Bucket[$D$]};
+    \node[font=\scriptsize] at (7.5, 0.0) {$t_3,\; t_5$};
+    \node[font=\scriptsize, below=0.12cm] at (bD.south)
+        {$\mathrm{sup}(\{A,D\})=2$};
+
+    % Arrows t1 → B (thẳng), t1 → C (cong xuống)
+    \draw[->, thick, blue!70]
+        (t1.east) --
+        node[above, font=\tiny]{$B$}
+        (bB.west);
+    \draw[->, thick, blue!70]
+        (t1.east) to[out=0, in=150, looseness=0.6]
+        node[above, font=\tiny, pos=0.35]{$C$}
+        (bC.west);
+
+    % Arrows t3 → C (cong lên), t3 → D (cong xuống)
+    \draw[->, thick, red!70]
+        (t3.east) to[out=0, in=210, looseness=0.6]
+        node[below, font=\tiny, pos=0.35]{$C$}
+        (bC.west);
+    \draw[->, thick, red!70]
+        (t3.east) to[out=0, in=150, looseness=0.6]
+        node[above, font=\tiny, pos=0.35]{$D$}
+        (bD.west);
+
+    % Arrows t5 → B (cong lên nhiều), t5 → D (thẳng)
+    \draw[->, thick, violet!70]
+        (t5.east) to[out=0, in=210, looseness=0.7]
+        node[below, font=\tiny, pos=0.25]{$B$}
+        (bB.west);
+    \draw[->, thick, violet!70]
+        (t5.east) --
+        node[below, font=\tiny]{$D$}
+        (bD.west);
+\end{tikzpicture}%
+}
+\caption{Minh họa OccurrenceDeliver với $P=\{A\}$,
+$\mathcal{T}(P)=\{t_1,t_3,t_5\}$. Mỗi transaction được phân phối
+vào bucket tương ứng với từng item xuất hiện. Sau một lần duyệt,
+ta có $\mathcal{T}(P\cup\{e\})$ cho mọi candidate
+$e \in \{B,C,D\}$ cùng lúc.}
+\label{fig:occdeliver}
+\end{figure}
+% \begin{figure}[H]
+% \centering
+% \begin{tikzpicture}[font=\small, node distance=1.2cm]
+%     % Transactions in T(P)
+%     \node[draw, rounded corners, fill=blue!10, minimum width=3cm, minimum height=0.6cm] (t1) at (0, 2.5) {$t_1 = \{A, B, C\}$};
+%     \node[draw, rounded corners, fill=blue!10, minimum width=3cm, minimum height=0.6cm] (t2) at (0, 1.7) {$t_3 = \{A, C, D\}$};
+%     \node[draw, rounded corners, fill=blue!10, minimum width=3cm, minimum height=0.6cm] (t3) at (0, 0.9) {$t_5 = \{A, B, D\}$};
+%     \node[above=0.1cm of t1, font=\bfseries\small] {$\mathcal{T}(P) = \{t_1, t_3, t_5\}$ với $P=\{A\}$};
+
+%     % Buckets
+%     \node[draw, fill=green!15, minimum width=1.5cm, minimum height=1.4cm] (bB) at (5, 2.5) {};
+%     \node[above, font=\bfseries\tiny] at (bB.north) {Bucket[$B$]};
+%     \node[font=\tiny] at (5, 2.7) {$t_1$};
+%     \node[font=\tiny] at (5, 2.4) {$t_5$};
+
+%     \node[draw, fill=green!15, minimum width=1.5cm, minimum height=1.4cm] (bC) at (7, 2.5) {};
+%     \node[above, font=\bfseries\tiny] at (bC.north) {Bucket[$C$]};
+%     \node[font=\tiny] at (7, 2.7) {$t_1$};
+%     \node[font=\tiny] at (7, 2.4) {$t_3$};
+
+%     \node[draw, fill=green!15, minimum width=1.5cm, minimum height=1.4cm] (bD) at (9, 2.5) {};
+%     \node[above, font=\bfseries\tiny] at (bD.north) {Bucket[$D$]};
+%     \node[font=\tiny] at (9, 2.7) {$t_3$};
+%     \node[font=\tiny] at (9, 2.4) {$t_5$};
+
+%     % Arrows
+%     \draw[->, thick, gray] (t1.east) -- node[above, font=\tiny]{$B,C$} (bB.west);
+%     \draw[->, thick, gray] (t2.east) -- node[above, font=\tiny]{$C,D$} (bC.west);
+%     \draw[->, thick, gray] (t3.east) -- node[below, font=\tiny]{$B,D$} (bD.west);
+
+%     % Result labels
+%     \node[font=\scriptsize, below=0.05cm of bB] {$\mathrm{sup}(\{A,B\})=2$};
+%     \node[font=\scriptsize, below=0.05cm of bC] {$\mathrm{sup}(\{A,C\})=2$};
+%     \node[font=\scriptsize, below=0.05cm of bD] {$\mathrm{sup}(\{A,D\})=2$};
+% \end{tikzpicture}
+% \caption{Minh họa OccurrenceDeliver với $P=\{A\}$, $\mathcal{T}(P)=\{t_1,t_3,t_5\}$. Mỗi transaction được phân phối vào bucket tương ứng với từng item xuất hiện. Sau một lần duyệt, ta có $\mathcal{T}(P\cup\{e\})$ cho mọi candidate $e \in \{B,C,D\}$ cùng lúc.}
+% \label{fig:occdeliver}
+% \end{figure}
+
+\subsubsection{HypercubeDecomposition, Xuất Hàng loạt Không cần Đếm Lại}
+
+LCMfreq thêm kỹ thuật \textbf{HypercubeDecomposition} (Uno et al., 2004, Section 3.3) để output nhiều frequent itemset cùng lúc mà không tốn thêm chi phí đếm support:
+
+\begin{definition}[Tập H(P)]
+Cho frequent itemset $P$. Định nghĩa:
+\[
+    H(P) = \{e : e > \mathrm{tail}(P),\ \mathcal{T}(P) = \mathcal{T}(P \cup \{e\})\}
+\]
+tức là tập tất cả item $e$ lớn hơn tail($P$) sao cho việc thêm $e$ vào $P$ \textbf{không làm giảm support}.
+\end{definition}
+
+Với mọi $Q \subseteq H(P)$, ta có $\mathcal{T}(P \cup Q) = \mathcal{T}(P)$, do đó $P \cup Q$ là frequent. Thay vì sinh đệ quy cho mỗi phần tử trong $H(P)$, LCMfreq output toàn bộ các tập con của $P \cup H(P)$ (một \textit{hypercube} trong không gian itemset) chỉ với một lần kiểm tra.
+
+\begin{algorithm}[H]
+\caption{HypercubeDecomposition (Uno et al., 2004, Section 3.3)}
+\label{alg:hypercube}
+\begin{algorithmic}[1]
+\Require Frequent itemset hiện tại $P$, tập tích lũy $S$
+\State $S' \gets S \cup H(P)$
+\State Output tất cả itemset $P'$ thỏa $P \subseteq P' \subseteq P \cup S'$
+\Comment{$2^{|S'|}$ itemset, tất cả có support bằng $\mathrm{sup}(P)$}
+\For{mỗi item $e \in \mathcal{I} \setminus (P \cup S')$, $e > \mathrm{tail}(P)$}
+    \If{$P \cup \{e\}$ là frequent}
+        \State \Call{HypercubeDecomposition}{$P \cup \{e\}$, $S'$}
+    \EndIf
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+Kỹ thuật này tiết kiệm $\approx 2^{|H(P)|}$ lần đếm support -- đặc biệt hiệu quả trên dense dataset nơi nhiều item có cùng tidset.
+
+\subsubsection{Rút gọn CSDL Linh hoạt (Anytime Database Reduction)}
+
+Ngoài hai kỹ thuật trên, LCMfreq dùng \textbf{anytime database reduction} (Uno et al., 2004, Section 3.2): trước mỗi lần gọi đệ quy với $P \cup \{e\}$, thuật toán tạo database rút gọn bằng cách:
+\begin{enumerate}
+    \item Loại bỏ các transaction \textbf{không chứa} $P \cup \{e\}$ (chúng không bao giờ đóng góp vào kết quả con của $P \cup \{e\}$).
+    \item Loại bỏ các item có chỉ số $\leq \mathrm{tail}(P \cup \{e\})$ (chúng không bao giờ được thêm vào nữa).
+    \item Hợp nhất các transaction giống hệt nhau.
+\end{enumerate}
+
+Database rút gọn này được truyền xuống lần đệ quy tiếp theo, không cần lưu lại database gốc. Kết quả thực nghiệm trong bài báo (Uno et al., 2004, Table 2) cho thấy kỹ thuật này giảm tổng kích thước database tích lũy xuống tới $\mathbf{349\times}$ trên tập Connect và $\mathbf{273\times}$ trên tập Pumsb.
+
+\subsubsection{Cấu trúc Dữ liệu Gốc trong Bài báo}
+
+Điểm quan trọng cần nhấn mạnh: thuật toán LCMfreq nguyên gốc trong bài báo \textbf{không dùng FP-tree} và \textbf{không dùng bitmap/BitArray}. Uno et al.~\cite{uno2004} giải thích:
+
+\begin{quote}
+\textit{``We do not use [FP-tree] in the implementation of LCM, but use simple arrays. The main reason is that LCM does not have to search transactions in the database. The main operation of LCM is tracing the transactions in the denotation of the current solution.''}
+\end{quote}
+
+Về bitmap, bài báo nhận định: \textit{``The bitmap method has a disadvantage for sparse datasets, and is not orthogonal to anytime database reduction... bitmap method seems to be not good for sparse large datasets.''} Do đó, LCMfreq gốc dùng \textbf{sorted integer arrays} cho tidset và OccurrenceDeliver để đếm support.
+
+\subsubsection{Phân tích Độ phức tạp}
+
+\textbf{Độ phức tạp thời gian.}
+\begin{itemize}
+    \item \textit{Khởi tạo}: Quét một lượt database để xây dựng bucket ban đầu: $O(\|\mathcal{D}\|)$, trong đó $\|\mathcal{D}\| = \sum_{T \in \mathcal{D}} |T|$ là tổng kích thước database.
+    \item \textit{Mỗi nút DFS}: OccurrenceDeliver tốn $O\bigl(\sum_{t \in \mathcal{T}(P)} |t|\bigr)$ cho tất cả candidate cùng lúc, tốt hơn down project $O\bigl(|\mathcal{F}(P)| \cdot |\mathcal{T}(P)|\bigr)$.
+    \item \textit{Tổng thể}: Bài báo chứng minh độ phức tạp bị chặn tuyến tính theo số frequent itemset đầu ra $|\mathcal{F}|$: $O(|\mathcal{F}| \cdot \|\mathcal{D}\|)$ trong trường hợp xấu nhất, cải thiện đáng kể so với Apriori.
+\end{itemize}
+
+\textbf{Độ phức tạp không gian.}
+\begin{itemize}
+    \item Lưu trữ database hiện tại: $O(\|\mathcal{D}\|)$ -- không phụ thuộc vào số frequent itemset đã tìm.
+    \item Stack đệ quy: mỗi tầng giữ database rút gọn, tổng cộng bị chặn bởi $O(\|\mathcal{D}\| \cdot \mathrm{depth})$.
+    \item \textbf{Ưu điểm then chốt}: bộ nhớ không tăng theo $|\mathcal{F}|$, trong khi các thuật toán dạng Apriori phải lưu toàn bộ $D_k$ trong bộ nhớ.
+\end{itemize}
+
+\textbf{Các yếu tố ảnh hưởng hiệu năng.}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l p{6cm} l}
+    \toprule
+    \textbf{Yếu tố} & \textbf{Ảnh hưởng} & \textbf{Xu hướng} \\
+    \midrule
+    Minsup ($\sigma$) giảm & Số frequent itemset $|\mathcal{F}|$ tăng theo hàm mũ & Tệ đi rất nhanh \\
+    Kích thước database ($n$) tăng & $\|\mathcal{D}\|$ tăng, OccurrenceDeliver chậm hơn & Tuyến tính \\
+    Độ dài transaction ($\bar{l}$) tăng & Mỗi bucket nhận nhiều phần tử hơn; nhiều candidate hơn & Phi tuyến \\
+    Dense dataset & HypercubeDecomposition hiệu quả hơn; anytime DB reduction giảm mạnh & Cải thiện \\
+    Sparse dataset & OccurrenceDeliver hiệu quả hơn bitmap (như nhận định bài báo) & Cải thiện \\
+    \bottomrule
+\end{tabular}
+\caption{Các yếu tố ảnh hưởng đến hiệu năng LCMFreq}
+\label{tab:complexity_factors}
+\end{table}
+
+\subsubsection{Vị trí trong Dòng thời gian FIM}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l l p{7.5cm}}
+    \toprule
+    \textbf{Năm} & \textbf{Thuật toán} & \textbf{Đóng góp và hạn chế} \\
+    \midrule
+    1994 & \gls{apriori}   & Khai sinh FIM; cắt tỉa Apriori (downward closure). Hạn chế: quét DB đa lượt, sinh nhiều candidate. \\
+    1997 & \gls{eclat}     & Vertical format, giao tidset thay vì quét ngang. Hạn chế: bộ nhớ lớn với dense dataset. \\
+    2000 & \gls{fpgrowth}  & FP-tree, không sinh candidate tường minh. Hạn chế: FP-tree tốn bộ nhớ, khó cập nhật. \\
+    2003 & dEclat          & Diffset (lưu sai biệt tidset thay vì toàn bộ). Hạn chế: tính diffset phức tạp hơn intersection. \\
+    2004 & \textbf{LCMFreq} & OccurrenceDeliver + HypercubeDecomposition + Anytime DB Reduction. Hiệu quả trên cả dense và sparse dataset. Hạn chế: bộ nhớ vẫn $O(n \cdot |\mathcal{I}|)$ trường hợp xấu. \\
+    \bottomrule
+\end{tabular}
+\caption{Dòng thời gian phát triển của các thuật toán FIM}
+\label{tab:timeline}
+\end{table}
+
+LCMfreq giải quyết hạn chế đa lượt quét của Apriori (OccurrenceDeliver), hạn chế bộ nhớ FP-tree (dùng mảng đơn giản + anytime DB reduction), và hạn chế bitmap của dEclat (tránh bitmap hoàn toàn cho sparse data). Trong cài đặt của nhóm (Chương~\ref{sec:implementation}), ta giữ nguyên khung backtracking và OccurrenceDeliver ở phiên bản baseline, sau đó đề xuất thêm tối ưu hóa BitArray riêng cho dense dataset.
+
+
+% ============================================================
+\section{VÍ DỤ MINH HỌA TAY}
+% ============================================================
+
+\subsection{Ví dụ 1: Cơ sở}
+\label{subsec:ex1}
+
+\subsubsection{Đề bài}
+
+Cho một transaction database gồm 5 transaction với item set $\mathcal{I} = \{A, B, C, D\}$ và ngưỡng $\sigma = 2$ (tuyệt đối):
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c l}
+    \toprule
+    \textbf{TID} & \textbf{Items} \\
+    \midrule
+    $T_1$ & $A,\ B,\ C,\ D$ \\
+    $T_2$ & $A,\ B,\ D$ \\
+    $T_3$ & $A,\ B,\ C$ \\
+    $T_4$ & $B,\ C$ \\
+    $T_5$ & $A,\ B,\ C,\ D$ \\
+    \bottomrule
+\end{tabular}
+\caption{Transaction database của Ví dụ 1}
+\label{tab:ex1_db}
+\end{table}
+
+\subsubsection{Bước 0: Occurrence Deliver tại gốc $P = \emptyset$}
+
+$\mathcal{T}(\emptyset) = \{T_1,T_2,T_3,T_4,T_5\}$ (toàn bộ database).
+Thuật toán duyệt \textbf{một lần duy nhất}, phân phối mỗi transaction
+vào bucket của từng item xuất hiện trong đó:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c l}
+    \toprule
+    \textbf{Bucket} & \textbf{Transactions} \\
+    \midrule
+    Bucket$[A]$ & $\{T_1,T_2,T_3,T_5\}$,\quad $\mathrm{sup}=4$ \\
+    Bucket$[B]$ & $\{T_1,T_2,T_3,T_4,T_5\}$,\quad
+                  $\mathrm{sup}=5 = |\mathcal{T}(\emptyset)|$ \\
+    Bucket$[C]$ & $\{T_1,T_3,T_4,T_5\}$,\quad $\mathrm{sup}=4$ \\
+    Bucket$[D]$ & $\{T_1,T_2,T_5\}$,\quad $\mathrm{sup}=3$ \\
+    \bottomrule
+\end{tabular}
+\caption{Bucket sau occurrence deliver tại $P=\emptyset$}
+\label{tab:bucket_root}
+\end{table}
+
+Vì $|\text{Bucket}[B]| = |\mathcal{T}(\emptyset)| = 5$, item $B$ không làm
+giảm support khi thêm vào $\emptyset$, do đó $B \in H(\emptyset)$.
+Cập nhật $S' = \emptyset \cup \{B\} = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\emptyset \subseteq Q \subseteq \{B\}$:
+\[
+    \{B\}:5
+\]
+
+Đệ quy với các item $\notin P \cup S' = \{B\}$,
+tức $\{A,C,D\}$, truyền $S=\{B\}$ xuống mọi lời gọi con.
+
+\subsubsection{Bước 1: Node $P=\{A\}$, $S=\{B\}$}
+
+$\mathcal{T}(\{A\}) = \text{Bucket}[A] = \{T_1,T_2,T_3,T_5\}$.
+Occurrence deliver với các item $> \mathrm{tail}(\{A\}) = A$:
+\[
+    \text{Bucket}[B] = \{T_1,T_2,T_3,T_5\},\quad \mathrm{sup}=4
+    = |\mathcal{T}(\{A\})| \;\Rightarrow\; B \in H(\{A\})
+\]
+\[
+    \text{Bucket}[C] = \{T_1,T_3,T_5\},\quad \mathrm{sup}=3
+    \qquad
+    \text{Bucket}[D] = \{T_1,T_2,T_5\},\quad \mathrm{sup}=3
+\]
+
+$H(\{A\}) = \{B\}$, $S' = \{B\} \cup \{B\} = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\{A\} \subseteq Q \subseteq \{A,B\}$:
+\[
+    \{A\}:4,\qquad \{A,B\}:4
+\]
+
+Đệ quy với $\{C,D\}$ (loại $B \in S'$).
+
+\paragraph{Bước 1.1: Node $P=\{A,C\}$, $S=\{B\}$}
+
+$\mathcal{T}(\{A,C\}) = \{T_1,T_3,T_5\}$.
+Occurrence deliver với item $> C$:
+\[
+    \text{Bucket}[D] = \{T_1,T_5\},\quad \mathrm{sup}=2
+    \neq 3 = |\mathcal{T}(\{A,C\})|
+\]
+
+$H(\{A,C\}) = \emptyset$, $S' = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\{A,C\} \subseteq Q \subseteq \{A,B,C\}$:
+\[
+    \{A,C\}:3,\qquad \{A,B,C\}:3
+\]
+
+Đệ quy với $\{D\}$.
+
+\subparagraph{Bước 1.1.1: Node $P=\{A,C,D\}$, $S=\{B\}$}
+
+$\mathcal{T}(\{A,C,D\}) = \{T_1,T_5\}$. Không còn item $> D$.
+$H(\{A,C,D\}) = \emptyset$, $S' = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\{A,C,D\} \subseteq Q \subseteq \{A,B,C,D\}$:
+\[
+    \{A,C,D\}:2,\qquad \{A,B,C,D\}:2
+\]
+
+Không còn lời gọi đệ quy.
+
+\paragraph{Bước 1.2: Node $P=\{A,D\}$, $S=\{B\}$}
+
+$\mathcal{T}(\{A,D\}) = \{T_1,T_2,T_5\}$. Không còn item $> D$.
+$H(\{A,D\}) = \emptyset$, $S' = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\{A,D\} \subseteq Q \subseteq \{A,B,D\}$:
+\[
+    \{A,D\}:3,\qquad \{A,B,D\}:3
+\]
+
+\subsubsection{Bước 2: Node $P=\{C\}$, $S=\{B\}$}
+
+$\mathcal{T}(\{C\}) = \{T_1,T_3,T_4,T_5\}$.
+Occurrence deliver với item $> C$:
+\[
+    \text{Bucket}[D] = \{T_1,T_5\},\quad \mathrm{sup}=2
+    \neq 4 = |\mathcal{T}(\{C\})|
+\]
+
+$H(\{C\}) = \emptyset$, $S' = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\{C\} \subseteq Q \subseteq \{B,C\}$:
+\[
+    \{C\}:4,\qquad \{B,C\}:4
+\]
+
+Đệ quy với $\{D\}$.
+
+\paragraph{Bước 2.1: Node $P=\{C,D\}$, $S=\{B\}$}
+
+$\mathcal{T}(\{C,D\}) = \{T_1,T_5\}$. Không còn item $> D$.
+$H(\{C,D\}) = \emptyset$, $S' = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\{C,D\} \subseteq Q \subseteq \{B,C,D\}$:
+\[
+    \{C,D\}:2,\qquad \{B,C,D\}:2
+\]
+
+\subsubsection{Bước 3: Node $P=\{D\}$, $S=\{B\}$}
+
+$\mathcal{T}(\{D\}) = \{T_1,T_2,T_5\}$. Không còn item $> D$.
+$H(\{D\}) = \emptyset$, $S' = \{B\}$.
+
+\textbf{Hypercube output}  mọi $Q$ với
+$\{D\} \subseteq Q \subseteq \{B,D\}$:
+\[
+    \{D\}:3,\qquad \{B,D\}:3
+\]
+
+\subsubsection{Kết quả}
+
+Tổng cộng 15 frequent itemsets, nhóm theo support:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c l}
+    \toprule
+    \textbf{Support} & \textbf{Frequent itemsets} \\
+    \midrule
+    5 & $\{B\}$ \\
+    4 & $\{A\},\ \{A,B\},\ \{C\},\ \{B,C\}$ \\
+    3 & $\{A,C\},\ \{A,B,C\},\ \{A,D\},\ \{A,B,D\},\ \{D\},\ \{B,D\}$ \\
+    2 & $\{A,C,D\},\ \{A,B,C,D\},\ \{C,D\},\ \{B,C,D\}$ \\
+    \bottomrule
+\end{tabular}
+\caption{Tất cả frequent itemsets tìm được (Ví dụ 1, $\sigma=2$)}
+\label{tab:ex1_result}
+\end{table}
+
+\noindent\textbf{Nhận xét quan trọng.} Item $B$ xuất hiện trong
+\emph{mọi} transaction, nên $|\mathcal{T}(P \cup \{B\})| =
+|\mathcal{T}(P)|$ với mọi $P$. Do đó $B \in H(P)$ tại mọi node,
+và LCMfreq \textbf{không bao giờ đệ quy theo $B$}  thay vào đó,
+$B$ được ghép tự động vào mọi output qua hypercube decomposition,
+tiết kiệm toàn bộ nhánh tìm kiếm liên quan đến $B$.
+Đây là điểm khác biệt cốt lõi so với ECLAT, vốn vẫn tạo nhánh
+$\{A,B\},\{B,C\},\ldots$ như các candidate độc lập.
+% \subsubsection{Bước 1: Xây dựng TID-set và kiểm tra item đơn}
+
+% Với $\sigma = 2$:
+
+% \begin{table}[H]
+% \centering
+% \begin{tabular}{c c c}
+%     \toprule
+%     \textbf{Item} & \textbf{TID-set} & \textbf{Support} \\
+%     \midrule
+%     $A$ & $\{1, 2, 3, 5\}$ & $4 \geq 2$ \cmark \\
+%     $B$ & $\{1, 2, 3, 4, 5\}$ & $5 \geq 2$ \cmark \\
+%     $C$ & $\{1, 3, 4, 5\}$ & $4 \geq 2$ \cmark \\
+%     $D$ & $\{1, 2, 5\}$ & $3 \geq 2$ \cmark \\
+%     \bottomrule
+% \end{tabular}
+% \caption{TID-set và support của các single item (Ví dụ 1). Mọi item đều frequent.}
+% \label{tab:ex1_single}
+% \end{table}
+
+% Thứ tự item: $A < B < C < D$ (theo bảng chữ cái).
+
+% \subsubsection{Bước 2: Duyệt DFS}
+
+% Thuật toán bắt đầu từ prefix rỗng $P = \emptyset$ với $\mathcal{T}(\emptyset) = \{1,2,3,4,5\}$ (tất cả transaction) và danh sách candidate $E = [A, B, C, D]$.
+
+% \textbf{Mở rộng với $A$:} $\mathcal{T}(\{A\}) = \mathcal{T}(\emptyset) \cap \mathcal{T}(A) = \{1,2,3,5\}$, $\supp = 4 \geq 2$. \textbf{Output} $\{A\}:4$.
+
+% \hspace{1em} \textbf{Mở rộng $\{A\}$ với $B$:} $\mathcal{T}(\{A,B\}) = \{1,2,3,5\} \cap \{1,2,3,4,5\} = \{1,2,3,5\}$, $\supp = 4$. \textbf{Output} $\{A,B\}:4$.
+
+% \hspace{2em} \textbf{Mở rộng $\{A,B\}$ với $C$:} $\mathcal{T}(\{A,B,C\}) = \{1,2,3,5\} \cap \{1,3,4,5\} = \{1,3,5\}$, $\supp = 3$. \textbf{Output} $\{A,B,C\}:3$.
+
+% \hspace{3em} \textbf{Mở rộng $\{A,B,C\}$ với $D$:} $\{1,3,5\} \cap \{1,2,5\} = \{1,5\}$, $\supp = 2$. \textbf{Output} $\{A,B,C,D\}:2$. Không còn candidate.
+
+% \hspace{2em} \textbf{Mở rộng $\{A,B\}$ với $D$:} $\{1,2,3,5\} \cap \{1,2,5\} = \{1,2,5\}$, $\supp = 3$. \textbf{Output} $\{A,B,D\}:3$. Không còn candidate.
+
+% \hspace{1em} \textbf{Mở rộng $\{A\}$ với $C$:} $\{1,2,3,5\} \cap \{1,3,4,5\} = \{1,3,5\}$, $\supp = 3$. \textbf{Output} $\{A,C\}:3$.
+
+% \hspace{2em} \textbf{Mở rộng $\{A,C\}$ với $D$:} $\{1,3,5\} \cap \{1,2,5\} = \{1,5\}$, $\supp = 2$. \textbf{Output} $\{A,C,D\}:2$.
+
+% \hspace{1em} \textbf{Mở rộng $\{A\}$ với $D$:} $\{1,2,3,5\} \cap \{1,2,5\} = \{1,2,5\}$, $\supp = 3$. \textbf{Output} $\{A,D\}:3$.
+
+% \textbf{Mở rộng với $B$:} $\mathcal{T}(\{B\}) = \{1,2,3,4,5\}$, $\supp = 5$. \textbf{Output} $\{B\}:5$.
+
+% \hspace{1em} \textbf{Mở rộng $\{B\}$ với $C$:} $\{1,3,4,5\}$, $\supp = 4$. \textbf{Output} $\{B,C\}:4$.
+
+% \hspace{2em} \textbf{Mở rộng $\{B,C\}$ với $D$:} $\{1,3,4,5\} \cap \{1,2,5\} = \{1,5\}$, $\supp = 2$. \textbf{Output} $\{B,C,D\}:2$.
+
+% \hspace{1em} \textbf{Mở rộng $\{B\}$ với $D$:} $\{1,2,3,4,5\} \cap \{1,2,5\} = \{1,2,5\}$, $\supp = 3$. \textbf{Output} $\{B,D\}:3$.
+
+% \textbf{Mở rộng với $C$:} $\mathcal{T}(\{C\}) = \{1,3,4,5\}$, $\supp = 4$. \textbf{Output} $\{C\}:4$.
+
+% \hspace{1em} \textbf{Mở rộng $\{C\}$ với $D$:} $\{1,3,4,5\} \cap \{1,2,5\} = \{1,5\}$, $\supp = 2$. \textbf{Output} $\{C,D\}:2$.
+
+% \textbf{Mở rộng với $D$:} $\mathcal{T}(\{D\}) = \{1,2,5\}$, $\supp = 3$. \textbf{Output} $\{D\}:3$. Không có candidate tiếp theo.
+
+% \subsubsection{Bước 3: Kết quả và Kiểm tra chéo}
+
+% \begin{table}[H]
+% \centering
+% \small
+% \begin{tabular}{l c l c}
+%     \toprule
+%     \textbf{Itemset} & \textbf{Sup} & \textbf{Itemset} & \textbf{Sup} \\
+%     \midrule
+%     $\{A\}$       & 4 & $\{A,B\}$     & 4 \\
+%     $\{B\}$       & 5 & $\{A,C\}$     & 3 \\
+%     $\{C\}$       & 4 & $\{A,D\}$     & 3 \\
+%     $\{D\}$       & 3 & $\{B,C\}$     & 4 \\
+%     $\{A,B,C\}$   & 3 & $\{B,D\}$     & 3 \\
+%     $\{A,B,D\}$   & 3 & $\{C,D\}$     & 2 \\
+%     $\{A,C,D\}$   & 2 & $\{A,B,C,D\}$ & 2 \\
+%     $\{B,C,D\}$   & 2 & & \\
+%     \bottomrule
+% \end{tabular}
+% \caption{Tất cả 15 frequent itemset ($\sigma = 2$) -- Ví dụ 1}
+% \label{tab:ex1_result}
+% \end{table}
+
+% \textbf{Kiểm tra chéo bằng liệt kê thủ công.} Không gian tìm kiếm có $2^4 - 1 = 15$ itemset khác rỗng. Itemset $\{A, B\}$ xuất hiện trong $T_1, T_2, T_3, T_5$ nên $\supp = 4 \geq 2$ -- khớp. Itemset $\{A, D\}$ xuất hiện trong $T_1, T_2, T_5$ nên $\supp = 3$ -- khớp. Tất cả 15 frequent itemset được liệt kê chính xác, không có itemset nào bị bỏ sót (DFS liệt kê toàn bộ nhánh) và không có itemset nào bị thêm sai (kiểm tra $\supp \geq \sigma$ tại mỗi bước). \cmark
+
+\subsection{Ví dụ 2: Tình huống Đặc biệt, Cắt tỉa Sớm khi Bucket Rỗng}
+\label{subsec:ex2}
+
+\subsubsection{Mục tiêu và Thiết kế}
+
+Ví dụ này minh họa tình huống đặc biệt quan trọng: item $D$ tuy
+frequent khi xét đơn lẻ ($\mathrm{sup}(\{D\}) \geq \sigma$), nhưng
+\textbf{không bao giờ đồng xuất hiện} với $A$, $B$, $C$ trong bất kỳ
+transaction nào. Khi đó, mọi extension chứa $D$ kết hợp với các item
+khác đều tạo ra bucket rỗng và bị cắt tỉa ngay trong bước occurrence
+deliver, \textbf{không cần đệ quy} vào các nhánh đó.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c l}
+    \toprule
+    \textbf{TID} & \textbf{Items} \\
+    \midrule
+    $T_1$ & $A,\ B,\ C$ \\
+    $T_2$ & $A,\ B$ \\
+    $T_3$ & $A,\ C$ \\
+    $T_4$ & $B,\ C$ \\
+    $T_5$ & $D$ \\
+    $T_6$ & $D$ \\
+    \bottomrule
+\end{tabular}
+\caption{Transaction database cho Ví dụ 2. Item $D$ chỉ xuất hiện
+trong $T_5, T_6$, không bao giờ cùng với $A$, $B$, $C$.}
+\label{tab:ex2_db}
+\end{table}
+
+Ngưỡng $\sigma = 2$, thứ tự item $A < B < C < D$.
+
+\subsubsection{Bước 0: Occurrence Deliver tại gốc $P = \emptyset$}
+
+$\mathcal{T}(\emptyset) = \{T_1,\ldots,T_6\}$.
+Duyệt một lần, phân phối vào bucket:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c l c}
+    \toprule
+    \textbf{Bucket} & \textbf{Transactions} & \textbf{Support} \\
+    \midrule
+    Bucket$[A]$ & $\{T_1, T_2, T_3\}$ & $3$ \\
+    Bucket$[B]$ & $\{T_1, T_2, T_4\}$ & $3$ \\
+    Bucket$[C]$ & $\{T_1, T_3, T_4\}$ & $3$ \\
+    Bucket$[D]$ & $\{T_5, T_6\}$       & $2$ \\
+    \bottomrule
+\end{tabular}
+\caption{Bucket sau occurrence deliver tại $P=\emptyset$ -- Ví dụ 2.}
+\label{tab:ex2_bucket_root}
+\end{table}
+
+Không có item nào có $|\text{Bucket}[\cdot]| = 6 = |\mathcal{T}(\emptyset)|$,
+nên $H(\emptyset) = \emptyset$, $S' = \emptyset$.
+Không có hypercube output tại gốc (bỏ qua itemset rỗng).
+Đệ quy với $\{A, B, C, D\}$.
+
+\subsubsection{Bước 1: Node $P=\{A\}$, $S=\emptyset$}
+
+$\mathcal{T}(\{A\}) = \{T_1,T_2,T_3\}$, $\mathrm{sup}=3$.
+Occurrence deliver với items $> A$:
+\[
+    \text{Bucket}[B] = \{T_1,T_2\},\quad \mathrm{sup}=2
+    \qquad
+    \text{Bucket}[C] = \{T_1,T_3\},\quad \mathrm{sup}=2
+\]
+\[
+    \text{Bucket}[D] = \emptyset,\quad \mathrm{sup}=0 < 2
+    \;\Rightarrow\; \textbf{cắt tỉa } \{A,D\}
+    \text{ và toàn bộ nhánh con.}
+\]
+
+$H(\{A\}) = \emptyset$, $S' = \emptyset$.
+\textbf{Output:} $\{A\}:3$.
+Đệ quy với $\{B, C\}$.
+
+\paragraph{Bước 1.1: Node $P=\{A,B\}$, $S=\emptyset$}
+
+$\mathcal{T}(\{A,B\}) = \{T_1,T_2\}$, $\mathrm{sup}=2$.
+Occurrence deliver với items $> B$:
+\[
+    \text{Bucket}[C] = \{T_1\},\quad \mathrm{sup}=1 < 2
+    \;\Rightarrow\; \textbf{cắt tỉa } \{A,B,C\}.
+    \qquad
+    \text{Bucket}[D] = \emptyset
+    \;\Rightarrow\; \textbf{cắt tỉa } \{A,B,D\}.
+\]
+
+$H(\{A,B\}) = \emptyset$. \textbf{Output:} $\{A,B\}:2$.
+Không có lời gọi đệ quy.
+
+\paragraph{Bước 1.2: Node $P=\{A,C\}$, $S=\emptyset$}
+
+$\mathcal{T}(\{A,C\}) = \{T_1,T_3\}$, $\mathrm{sup}=2$.
+Occurrence deliver với items $> C$:
+\[
+    \text{Bucket}[D] = \emptyset,\quad \mathrm{sup}=0
+    \;\Rightarrow\; \textbf{cắt tỉa } \{A,C,D\}.
+\]
+
+$H(\{A,C\}) = \emptyset$. \textbf{Output:} $\{A,C\}:2$.
+Không có lời gọi đệ quy.
+
+\subsubsection{Bước 2: Node $P=\{B\}$, $S=\emptyset$}
+
+$\mathcal{T}(\{B\}) = \{T_1,T_2,T_4\}$, $\mathrm{sup}=3$.
+Occurrence deliver với items $> B$:
+\[
+    \text{Bucket}[C] = \{T_1,T_4\},\quad \mathrm{sup}=2
+    \qquad
+    \text{Bucket}[D] = \emptyset
+    \;\Rightarrow\; \textbf{cắt tỉa } \{B,D\}.
+\]
+
+$H(\{B\}) = \emptyset$. \textbf{Output:} $\{B\}:3$.
+Đệ quy với $\{C\}$.
+
+\paragraph{Bước 2.1: Node $P=\{B,C\}$, $S=\emptyset$}
+
+$\mathcal{T}(\{B,C\}) = \{T_1,T_4\}$, $\mathrm{sup}=2$.
+Occurrence deliver với items $> C$:
+\[
+    \text{Bucket}[D] = \emptyset
+    \;\Rightarrow\; \textbf{cắt tỉa } \{B,C,D\}.
+\]
+
+$H(\{B,C\}) = \emptyset$. \textbf{Output:} $\{B,C\}:2$.
+Không có lời gọi đệ quy.
+
+\subsubsection{Bước 3: Node $P=\{C\}$, $S=\emptyset$}
+
+$\mathcal{T}(\{C\}) = \{T_1,T_3,T_4\}$, $\mathrm{sup}=3$.
+Occurrence deliver với items $> C$:
+\[
+    \text{Bucket}[D] = \emptyset
+    \;\Rightarrow\; \textbf{cắt tỉa } \{C,D\}.
+\]
+
+$H(\{C\}) = \emptyset$. \textbf{Output:} $\{C\}:3$.
+Không có lời gọi đệ quy.
+
+\subsubsection{Bước 4: Node $P=\{D\}$, $S=\emptyset$}
+
+$\mathcal{T}(\{D\}) = \{T_5,T_6\}$, $\mathrm{sup}=2$.
+Không còn item $> D$.
+$H(\{D\}) = \emptyset$.
+\textbf{Output:} $\{D\}:2$. Không có lời gọi đệ quy.
+
+\subsubsection{Kết quả và Phân tích}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l c}
+    \toprule
+    \textbf{Frequent itemset} & \textbf{Support} \\
+    \midrule
+    $\{A\}$ & 3 \\
+    $\{B\}$ & 3 \\
+    $\{C\}$ & 3 \\
+    $\{D\}$ & 2 \\
+    $\{A,B\}$ & 2 \\
+    $\{A,C\}$ & 2 \\
+    $\{B,C\}$ & 2 \\
+    \bottomrule
+\end{tabular}
+\caption{7 frequent itemset ($\sigma=2$) -- Ví dụ 2.}
+\label{tab:ex2_result}
+\end{table}
+
+\textbf{Tại sao đây là tình huống đặc biệt?}
+Vì $\mathcal{T}(D) = \{T_5,T_6\}$ không có transaction nào chung với
+$\mathcal{T}(A)$, $\mathcal{T}(B)$, $\mathcal{T}(C)$, occurrence deliver
+luôn trả về Bucket$[D] = \emptyset$ tại mọi node $P \subseteq \{A,B,C\}$.
+LCMFreq phát hiện điều này \textbf{ngay trong bước duyệt}
+$\mathcal{T}(P)$, không cần sinh hay kiểm tra candidate nào thêm.
+
+Ngược lại, Apriori vẫn phải sinh các candidate
+$\{A,D\},\{B,D\},\{C,D\},\{A,B,D\},\{A,C,D\}, \\ \{B,C,D\}$
+rồi mới loại bỏ. \textbf{Tổng số nhánh được cắt tỉa: 6},
+tương ứng 6 itemset không cần khám phá thêm:
+$\{A,D\}$, $\{A,B,C\}$, $\{A,B,D\}$, $\{A,C,D\}$,
+$\{B,D\}$, $\{B,C,D\}$, $\{C,D\}$.
+% \subsection{Ví dụ 2: Tình huống Đặc biệt -- Cắt tỉa Sớm khi Giao Tidset Rỗng}
+% \label{subsec:ex2}
+
+% \subsubsection{Mục tiêu và Thiết kế}
+
+% Ví dụ này minh họa tình huống đặc biệt quan trọng: item $D$ tuy frequent khi xét đơn lẻ ($\supp(\{D\}) \geq \sigma$), nhưng \textbf{không bao giờ đồng xuất hiện} với các item khác. Khi đó, mọi cặp hoặc itemset lớn hơn có chứa $D$ đều có tidset rỗng và bị cắt tỉa ngay lập tức. Đây là điểm mạnh của vertical format: phát hiện khả năng ghép đôi thất bại trong $O(n/64)$ thay vì phải kiểm tra từng transaction.
+
+% \begin{table}[H]
+% \centering
+% \begin{tabular}{c l}
+%     \toprule
+%     \textbf{TID} & \textbf{Items} \\
+%     \midrule
+%     $T_1$ & $A,\ B,\ C$ \\
+%     $T_2$ & $A,\ B$ \\
+%     $T_3$ & $A,\ C$ \\
+%     $T_4$ & $B,\ C$ \\
+%     $T_5$ & $D$ \\
+%     $T_6$ & $D$ \\
+%     \bottomrule
+% \end{tabular}
+% \caption{Transaction database -- Ví dụ 2. Item $D$ chỉ xuất hiện trong $T_5, T_6$, không bao giờ cùng với $A$, $B$, $C$.}
+% \label{tab:ex2_db}
+% \end{table}
+
+% Ngưỡng $\sigma = 2$.
+
+% \subsubsection{TID-set các single item}
+
+% \begin{table}[H]
+% \centering
+% \begin{tabular}{c c c}
+%     \toprule
+%     \textbf{Item} & \textbf{TID-set} & \textbf{Support} \\
+%     \midrule
+%     $A$ & $\{1, 2, 3\}$ & $3 \geq 2$ \cmark \\
+%     $B$ & $\{1, 2, 4\}$ & $3 \geq 2$ \cmark \\
+%     $C$ & $\{1, 3, 4\}$ & $3 \geq 2$ \cmark \\
+%     $D$ & $\{5, 6\}$    & $2 \geq 2$ \cmark \\
+%     \bottomrule
+% \end{tabular}
+% \caption{TID-set các single item -- Ví dụ 2. Mọi item đều đủ ngưỡng frequent.}
+% \label{tab:ex2_single}
+% \end{table}
+
+% Lưu ý: $\mathcal{T}(D) = \{5,6\}$ và $\mathcal{T}(A) \cup \mathcal{T}(B) \cup \mathcal{T}(C) \subseteq \{1,2,3,4\}$, nên $\mathcal{T}(D) \cap \mathcal{T}(X) = \emptyset$ với mọi $X \subseteq \{A,B,C\}$.
+
+% \subsubsection{Duyệt DFS và Điểm Cắt tỉa}
+
+% \textbf{Mở rộng với $A$:} $\mathcal{T}(\{A\}) = \{1,2,3\}$, $\supp = 3$. Xuất $\{A\}:3$.
+% \begin{itemize}
+%     \item Mở rộng $\{A\}$ với $B$: $\{1,2,3\} \cap \{1,2,4\} = \{1,2\}$, $\supp=2$. Xuất $\{A,B\}:2$.
+%     \begin{itemize}
+%         \item Mở rộng $\{A,B\}$ với $C$: $\{1,2\} \cap \{1,3,4\} = \{1\}$, $\supp=1 < 2$. \textbf{Cắt tỉa.} \xmark
+%         \item Mở rộng $\{A,B\}$ với $D$: $\{1,2\} \cap \{5,6\} = \emptyset$, $\supp=0 < 2$. \textbf{Cắt tỉa (giao rỗng).} \xmark
+%     \end{itemize}
+%     \item Mở rộng $\{A\}$ với $C$: $\{1,2,3\} \cap \{1,3,4\} = \{1,3\}$, $\supp=2$. Xuất $\{A,C\}:2$.
+%     \begin{itemize}
+%         \item Mở rộng $\{A,C\}$ với $D$: $\{1,3\} \cap \{5,6\} = \emptyset$, $\supp=0$. \textbf{Cắt tỉa.} \xmark
+%     \end{itemize}
+%     \item Mở rộng $\{A\}$ với $D$: $\{1,2,3\} \cap \{5,6\} = \emptyset$, $\supp=0$. \textbf{Cắt tỉa.} \xmark
+% \end{itemize}
+
+% \textbf{Mở rộng với $B$:} $\mathcal{T}(\{B\}) = \{1,2,4\}$, $\supp = 3$. Xuất $\{B\}:3$.
+% \begin{itemize}
+%     \item $\{B,C\}$: $\{1,2,4\} \cap \{1,3,4\} = \{1,4\}$, $\supp=2$. Xuất $\{B,C\}:2$.
+%     \begin{itemize}
+%         \item $\{B,C,D\}$: $\{1,4\} \cap \{5,6\} = \emptyset$. \textbf{Cắt tỉa.} \xmark
+%     \end{itemize}
+%     \item $\{B,D\}$: $\{1,2,4\} \cap \{5,6\} = \emptyset$. \textbf{Cắt tỉa.} \xmark
+% \end{itemize}
+
+% \textbf{Mở rộng với $C$:} $\mathcal{T}(\{C\}) = \{1,3,4\}$, $\supp=3$. Xuất $\{C\}:3$.
+% \begin{itemize}
+%     \item $\{C,D\}$: $\{1,3,4\} \cap \{5,6\} = \emptyset$. \textbf{Cắt tỉa.} \xmark
+% \end{itemize}
+
+% \textbf{Mở rộng với $D$:} $\mathcal{T}(\{D\}) = \{5,6\}$, $\supp=2$. Xuất $\{D\}:2$. Không có ứng viên nào ($A$, $B$, $C$ đứng trước $D$).
+
+% \subsubsection{Kết quả và Phân tích}
+
+% \begin{table}[H]
+% \centering
+% \begin{tabular}{l c}
+%     \toprule
+%     \textbf{Frequent itemset} & \textbf{Support} \\
+%     \midrule
+%     $\{A\}$ & 3 \\
+%     $\{B\}$ & 3 \\
+%     $\{C\}$ & 3 \\
+%     $\{D\}$ & 2 \\
+%     $\{A,B\}$ & 2 \\
+%     $\{A,C\}$ & 2 \\
+%     $\{B,C\}$ & 2 \\
+%     \bottomrule
+% \end{tabular}
+% \caption{7 frequent itemset ($\sigma=2$) -- Ví dụ 2}
+% \label{tab:ex2_result}
+% \end{table}
+
+% \textbf{Tại sao đây là tình huống đặc biệt?} Item $D$ vượt ngưỡng support khi xét đơn lẻ, vì vậy thuật toán Apriori vẫn phải sinh các candidate $\{A,D\}$, $\{B,D\}$, $\{C,D\}$, ... rồi mới kiểm tra và loại bỏ. Ngược lại, LCMFreq phát hiện giao tidset rỗng ngay lập tức tại bước tính $\mathcal{T}(\{A\}) \cap \mathcal{T}(\{D\})$: kết quả là BitArray toàn số 0 ($\supp = 0$), cho phép cắt tỉa toàn bộ cây con chứa $D$ khi prefix đã chứa $A$, $B$, hoặc $C$. \textbf{Tổng số lần cắt tỉa thành công: 6 lần}, tương ứng 6 nhánh không cần khám phá.
+
+
+% ============================================================
+\section{CÀI ĐẶT}
+\label{sec:implementation}
+% ============================================================
+
+\subsection{Môi trường và Công cụ}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l l}
+    \toprule
+    \textbf{Thành phần} & \textbf{Chi tiết} \\
+    \midrule
+    Ngôn ngữ cài đặt  & Julia 1.12.6 (x86-64, Windows) \\
+    Thư viện sử dụng  & \texttt{DataStructures.jl}, \texttt{BenchmarkTools.jl} \\
+    Công cụ tham chiếu & \gls{spmf} v0.96r18 (Java, \texttt{AlgoLCMFreq.java}) \\
+    Python (biểu đồ)  & Python 3.x, matplotlib 3.10.3, seaborn \\
+    Hệ điều hành      & Windows 11, CPU Intel x86-64 (hỗ trợ AVX2, POPCNT) \\
+    Quản lý gói       & \texttt{Project.toml} / \texttt{Manifest.toml} \\
+    \bottomrule
+\end{tabular}
+\caption{Môi trường và công cụ phát triển}
+\label{tab:env}
+\end{table}
+
+\subsection{Cài đặt Baseline, OccurrenceDeliver với Vector tidset}
+
+File \texttt{src/algorithm/lcmfreq\_base.jl} cài đặt phiên bản cơ sở trung thành với tinh thần bài báo gốc: dùng \textbf{OccurrenceDeliver} (bucket-based) để tính support và cấu trúc dữ liệu đơn giản là \texttt{Vector\{Int\}} (danh sách TID sắp xếp tăng dần).
+
+Khởi tạo: xây dựng bucket ban đầu bằng một lần quét toàn bộ database:
+
+\begin{lstlisting}[language=Python, caption={Xây dựng bucket ban đầu bằng OccurrenceDeliver (Baseline)}, label=lst:baseline_bucket]
+# Occurrence delivery: buckets[item] = danh sach TID chua item
+buckets = [Int[] for _ in 1:(max_item + 1)]
+for (tid, tx) in enumerate(transactions)
+    for item in tx
+        push!(buckets[item], tid)  # phan phoi transaction vao bucket
+    end
+end
+\end{lstlisting}
+
+Tại mỗi bước đệ quy, để tính support của $P \cup \{e\}$ từ bucket hiện tại của $P$, ta lấy giao hai danh sách đã sắp:
+
+\begin{lstlisting}[language=Python, caption={Giao hai TID-list sắp xếp để tính T(P cup {e}) (Baseline)}, label=lst:baseline_intersect]
+function intersect_sorted(a::Vector{Int}, b::Vector{Int})::Vector{Int}
+    result = Int[]
+    i, j = 1, 1
+    while i <= length(a) && j <= length(b)
+        if a[i] == b[j]
+            push!(result, a[i]); i += 1; j += 1
+        elseif a[i] < b[j]
+            i += 1
+        else
+            j += 1
+        end
+    end
+    return result
+end
+\end{lstlisting}
+
+Chi phí giao: $O(|\mathcal{T}(P)| + |\mathcal{T}(e)|)$ mỗi lần. Với $|\mathcal{T}(P)|$ có thể lên tới $n$, chi phí tuyến tính theo $n$ cho mỗi candidate $e$.
+
+\textbf{Hạn chế của Baseline.}
+\begin{itemize}
+    \item Mỗi phần tử trong TID-list chiếm 8 byte (Int64), trong khi bản chất chỉ cần 1 bit (transaction có/không chứa item).
+    \item \texttt{Vector\{Int\}(undef, max\_item+1)} phân bổ mảng theo kích thước ID item lớn nhất -- với sparse dataset như Retail ($\max(\mathcal{I}) = 16{,}470$), gây OOM nghiêm trọng dù chỉ có vài nghìn item phổ biến.
+\end{itemize}
+
+\subsection{Cài đặt Tối ưu hóa BitArray}
+
+\textbf{Lưu ý quan trọng:} Tối ưu hóa BitArray \textbf{không có trong bài báo gốc} Uno et al.~\cite{uno2004}. Thực tế, bài báo chỉ rõ rằng bitmap \textit{``has a disadvantage for sparse datasets''} và không khuyến nghị dùng. Đây là đóng góp tối ưu hóa độc lập của nhóm, áp dụng heuristic BitArray trên nền tảng khung backtracking DFS của LCMfreq, phù hợp với môi trường Julia 1.12 có SIMD và POPCNT phần cứng.
+
+File \texttt{src/algorithm/lcmfreq.jl} thay thế TID-list bằng \gls{bitarray} $n$-bit. Các lựa chọn thiết kế chính:
+
+\textbf{(1) Dict thay vì Vector để lưu tidset.} Với dataset thưa, $\max(\mathcal{I})$ có thể rất lớn trong khi số mục phổ biến ít. Dùng \texttt{Dict\{Int, BitArray\{1\}\}} chỉ phân bổ bộ nhớ cho các mục thực sự phổ biến, khắc phục OOM của baseline:
+
+\begin{lstlisting}[caption={Xây dựng tidset BitArray chỉ cho mục phổ biến (Tối ưu)}, label=lst:build_tidset]
+tidsets_full = Dict{Int, BitArray{1}}()
+for item in all_freq_items
+    tidsets_full[item] = falses(n)
+end
+for (tid, tx) in enumerate(transactions)
+    for item in tx
+        if haskey(tidsets_full, item)
+            @inbounds tidsets_full[item][tid] = true
+        end
+    end
+end
+\end{lstlisting}
+
+\textbf{(2) Phép giao bằng AND bit.} Thay vì OccurrenceDeliver, phiên bản tối ưu dùng giao trực tiếp qua phép AND: Julia tự động SIMD-hóa \texttt{.\&} trên BitArray, xử lý 64 transaction mỗi lệnh CPU:
+
+\begin{lstlisting}[caption={Giao tidset bằng AND bit và đếm support bằng POPCNT (Tối ưu)}, label=lst:bitarray_intersect]
+tidset_Pe = tidset_P .& tidsets_full[e]   # AND toan bit, tu dong SIMD
+support_Pe = count(tidset_Pe)              # POPCNT phan cung
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[font=\small]
+
+    %% ── Baseline: Vector{Int} ─────────────────────────
+    \node[anchor=west, font=\bfseries\small] at (0, 5.8)
+        {Baseline: \texttt{Vector\{Int\}} -- TID-list};
+
+    \foreach \i/\v in {0/1, 1/3, 2/5, 3/7} {
+        \draw[thick] (\i*1.0, 4.5) rectangle (\i*1.0+0.9, 5.2);
+        \node at (\i*1.0+0.45, 4.85) {\v};
+    }
+
+    \node[anchor=west] at (0, 4.1)
+        {$\mathcal{T}(e) = \{1,3,5,7\}$
+         \quad 4 phần tử $\times$ 8 byte = \textbf{32 byte}};
+
+    %% ── Divider ───────────────────────────────────────
+    \draw[gray!60, dashed] (-0.2, 3.75) -- (8.0, 3.75);
+
+    %% ── Optimized: BitArray ───────────────────────────
+    \node[anchor=west, font=\bfseries\small] at (0, 3.35)
+        {Tối ưu: \texttt{BitArray} -- bitmask};
+
+    \foreach \i/\v in {0/1, 1/0, 2/1, 3/0, 4/1, 5/0, 6/1, 7/0} {
+        \draw[thick] (\i*0.78, 2.05) rectangle (\i*0.78+0.73, 2.75);
+        \node at (\i*0.78+0.365, 2.40) {\v};
+    }
+
+    \foreach \i/\idx in {0/1, 1/2, 2/3, 3/4, 4/5, 5/6, 6/7, 7/8} {
+        \node[gray, font=\tiny] at (\i*0.78+0.365, 1.78)
+            {$T_{\idx}$};
+    }
+
+    \node[anchor=west] at (0, 1.35)
+        {$\mathcal{T}(e) = [1,0,1,0,1,0,1,0]$
+         \quad 8 bit = \textbf{1 byte}};
+
+    %% ── Savings annotation ────────────────────────────
+    \node[anchor=west, font=\itshape\scriptsize, text=gray] at (0, 0.75)
+        {Tiết kiệm $32\times$ bộ nhớ; phép AND/POPCNT chạy trực tiếp
+         trên phần cứng.};
+
+\end{tikzpicture}
+\caption{So sánh hai biểu diễn TID-set: danh sách số nguyên (baseline)
+và BitArray (tối ưu của nhóm). Với $n=8$ transaction và $e$ xuất hiện
+trong $\{T_1,T_3,T_5,T_7\}$. BitArray tiết kiệm $32\times$ bộ nhớ và
+cho phép AND/POPCNT phần cứng.}
+\label{fig:tidset_repr}
+\end{figure}
+
+\textbf{(3) Không biến đổi (immutable) tidset gốc.} \texttt{tidsets\_full} là read-only; mỗi tầng đệ quy tự tính \texttt{tidset\_Pe} mới. Điều này tránh lỗi shared-mutable-state trong DFS.
+
+\textbf{(4) Buffer tái sử dụng cho prefix.} Mảng \texttt{p\_buf} được phân bổ một lần và truyền tham chiếu qua các lần đệ quy, tránh phân bổ heap nhiều lần.
+
+\subsection{Kiểm thử Đơn vị}
+
+File \texttt{tests/test\_correctness.jl} chứa 24 test case bao gồm:
+\begin{itemize}
+    \item 5 toy dataset từ ví dụ tay (Mục \ref{subsec:ex1}, \ref{subsec:ex2}).
+    \item 5 benchmark dataset ở nhiều mức minsup.
+    \item Các trường hợp biên: database rỗng, minsup bằng 1, tất cả item frequent.
+\end{itemize}
+Kết quả: \textbf{24/24 test pass}, so khớp chính xác với đầu ra SPMF trên cùng đầu vào.
+
+\subsection{Định dạng Đầu vào/Đầu ra}
+
+Cài đặt tuân thủ định dạng SPMF: mỗi transaction là một dòng gồm các số nguyên cách nhau bằng dấu cách. Đầu ra mỗi dòng có dạng: \texttt{item1 item2 ... \#SUP: support}.
+
+\begin{lstlisting}[caption={Sử dụng từ dòng lệnh (CLI)}, label=lst:cli]
+# Chay toi uu hoa
+julia --project=. src/algorithm/lcmfreq.jl data/input.txt output.txt 0.3
+
+# Chay baseline
+julia --project=. src/algorithm/lcmfreq_base.jl data/input.txt output.txt 0.3
+\end{lstlisting}
+
+
+% ============================================================
+\section{THỰC NGHIỆM VÀ ĐÁNH GIÁ}
+% ============================================================
+
+\subsection{Tập Dữ liệu Benchmark}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l r r r l}
+    \toprule
+    \textbf{Tập dữ liệu} & \textbf{\#Transaction} & \textbf{\#Item} & \textbf{Avg. length} & \textbf{Đặc điểm} \\
+    \midrule
+    Chess        & 3\,196    & 75      & 37.0 & \gls{dense}, long itemset \\
+    Connect      & 67\,557   & 129     & 43.0 & \gls{dense}, rất dày đặc \\
+    Mushroom     & 8\,124    & 119     & 23.0 & \gls{dense}, nhiều item \\
+    Pumsb        & 49\,046   & 2\,113  & 74.0 & \gls{dense}, avg\_len rất lớn \\
+    Accidents    & 340\,183  & 468     & 33.8 & Rất lớn, dense/middle \\
+    Retail       & 88\,162   & 16\,470 & 10.3 & \gls{sparse}, dữ liệu thực \\
+    T10I4D100K   & 100\,000  & 870     & 10.1 & Tổng hợp, sparse \\
+    T40I10D100K  & 100\,000  & 942     & 39.6 & Tổng hợp, sparse dài \\
+    Kosarak      & 990\,002  & 41\,270 & 8.1  & Cực lớn, rất thưa \\
+    \bottomrule
+\end{tabular}
+\caption{Đặc tính 9 tập dữ liệu benchmark từ kho FIMI sử dụng trong thực nghiệm}
+\label{tab:datasets}
+\end{table}
+
+\subsection{Kiểm tra Tính Đúng đắn}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l r r r r}
+    \toprule
+    \textbf{Tập dữ liệu} & \textbf{minsup (\%)} & \textbf{Julia Opt} & \textbf{SPMF} & \textbf{Khớp (\%)} \\
+    \midrule
+    Chess        & 75\%   & 20\,993 & 20\,993 & 100.0\% \\
+    Connect      & 93\%   & 7\,203  & 7\,203  & 100.0\% \\
+    Mushroom     & 30\%   & 2\,735  & 2\,735  & 100.0\% \\
+    Pumsb        & 90\%   & 2\,607  & 2\,607  & 100.0\% \\
+    Accidents    & 80\%   & 149     & 149     & 100.0\% \\
+    Retail       & 2\%    & 55      & 55      & 100.0\% \\
+    T10I4D100K   & 0.8\%  & 494     & 494     & 100.0\% \\
+    T40I10D100K  & 2\%    & 2\,293  & 2\,293  & 100.0\% \\
+    Kosarak      & 0.8\%  & 583     & 583     & 100.0\% \\
+    \bottomrule
+\end{tabular}
+\caption{Kết quả kiểm tra tính đúng đắn: số lượng frequent itemset và tỉ lệ khớp với SPMF trên 9 tập dữ liệu}
+\label{tab:correctness}
+\end{table}
+
+Kết quả \textbf{100\% khớp} trên tất cả 9 dataset, không có sai lệch về số lượng frequent itemset hay giá trị support.
+
+\subsection{Thời gian Chạy theo Ngưỡng Minsup}
+
+Hình~\ref{fig:runtime_dense} và~\ref{fig:runtime_sparse} trình bày đồ thị thời gian chạy (trục $y$ logarithm) theo minsup trên toàn bộ 9 tập dữ liệu, so sánh Julia~Opt, Baseline và SPMF Java.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{runtime_chess.png}
+    \caption{Chess: $76\times$--$141\times$ so với SPMF}
+    \label{fig:runtime_chess}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{runtime_mushroom.png}
+    \caption{Mushroom: $24\times$--$71\times$ so với SPMF}
+    \label{fig:runtime_mushroom}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{runtime_connect.png}
+    \caption{Connect: trung vị $5{,}8\times$; JIT overhead ở minsup cao}
+    \label{fig:runtime_connect}
+\end{subfigure}
+\bigskip
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{runtime_pumsb.png}
+    \caption{Pumsb: $12\times$--$343\times$; avg\_len=74 cho lợi thế BitArray lớn nhất}
+    \label{fig:runtime_pumsb}
+\end{subfigure}
+\hspace{0.2cm}
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{runtime_accidents.png}
+    \caption{Accidents: $1{,}6\times$--$22\times$ so với SPMF; Baseline OOM}
+    \label{fig:runtime_accidents}
+\end{subfigure}
+\caption{Thời gian chạy trên 5 tập dữ liệu \textbf{dày đặc} (dense) theo minsup giảm dần. Trục $y$ logarithm. So sánh Julia~Opt (tối ưu BitArray), Baseline (vector tidset) và SPMF Java.}
+\label{fig:runtime_dense}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{runtime_retail.png}
+    \caption{Retail -- Baseline OOM; Julia~Opt $2{,}4\times$--$6{,}2\times$ so với SPMF}
+    \label{fig:runtime_retail}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{runtime_t10i4d100k.png}
+    \caption{T10I4D100K -- $4{,}3\times$--$9{,}1\times$ so với SPMF}
+    \label{fig:runtime_t10i4d100k}
+\end{subfigure}
+
+\bigskip
+\begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{runtime_t40i10d100k.png}
+    \caption{T40I10D100K -- $21\times$--$32\times$ so với SPMF}
+    \label{fig:runtime_t40i10d100k}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{runtime_kosarak.png}
+    \caption{Kosarak -- SPMF không đo được; Julia~Opt 424--1\,827\,ms}
+    \label{fig:runtime_kosarak}
+\end{subfigure}
+\caption{Thời gian chạy trên 4 tập dữ liệu \textbf{thưa/tổng hợp} (sparse/synthetic) theo minsup giảm dần. Trục $y$ logarithm. Baseline OOM trên Retail và Kosarak do phân bổ vector theo max item ID.}
+\label{fig:runtime_sparse}
+\end{figure}
+
+\textbf{Nhận xét.} Mức tăng tốc lớn nhất đạt được trên dense dataset (Chess, Connect, Mushroom, Pumsb) vì dense data tạo ra nhiều frequent itemset, làm tăng số lần giao tidset. Phép AND bit trên BitArray mang lại lợi thế lớn nhất ở đây. Trên sparse dataset (Retail, T10I4D100K, T40I10D100K, Kosarak), mức tăng tốc thấp hơn vì tidset nhỏ hơn và chi phí từng phép giao thấp hơn ngay cả với baseline. Đặc biệt, Kosarak với 41,270 distinct items chỉ có thể chạy với cài đặt tối ưu (Dict-based) -- baseline OOM ngay từ đầu.
+
+\subsection{Số lượng Frequent Itemset theo Minsup}
+
+\begin{figure}[t]
+\begin{minipage}[t]{0.67\textwidth}
+    \vspace{0pt}
+    \begin{subfigure}[b]{\linewidth}
+        \includegraphics[width=\linewidth]{itemsets_dense.png}
+        \caption{Dense datasets}
+        \label{fig:itemsets_dense}
+    \end{subfigure}
+    \bigskip
+    \begin{subfigure}[b]{\linewidth}
+        \includegraphics[width=\linewidth]{itemsets_sparse.png}
+        \caption{Sparse datasets}
+        \label{fig:itemsets_sparse}
+    \end{subfigure}
+\end{minipage}%
+\hspace{0.03\textwidth}
+\begin{minipage}[t]{0.27\textwidth}
+    \vspace{1.5em}
+    \captionsetup{justification=raggedright,singlelinecheck=false,font=small}
+    \caption{Số lượng frequent itemset theo minsup trên 9 tập dữ liệu (tách dense và sparse). Dense dataset (Chess, Connect, Mushroom, Pumsb) tăng theo hàm mũ khi minsup giảm; sparse dataset tăng chậm hơn nhiều.}
+    \label{fig:itemsets_all}
+\end{minipage}
+\end{figure}
+
+Xu hướng ở Hình~\ref{fig:itemsets_all} minh họa trực tiếp \gls{antimonotone}: khi $\sigma$ giảm, ngưỡng chấp nhận thấp hơn, cây DFS ít bị cắt tỉa hơn, số frequent itemset tăng theo dạng mũ với dense dataset.
+
+\subsection{So sánh Tăng tốc Tổng quan}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l l r r r}
+    \toprule
+    \textbf{Tập dữ liệu} & \textbf{Đặc điểm} & \textbf{Trung vị} & \textbf{Min} & \textbf{Max} \\
+    \midrule
+    Chess       & Dense                & $135\times$ & $22\times$ & $241\times$ \\
+    Mushroom    & Dense                & $58\times$  & $23\times$ & $101\times$ \\
+    Connect     & Dense                & $6\times$   & $1\times$  & $34\times$  \\
+    Pumsb       & Dense, avg\_len = 74 & $343\times$ & $12\times$ & $343\times$ \\
+    Accidents   & Dense, rất lớn       & $7\times$   & $2\times$  & $22\times$  \\
+    Retail      & Sparse, dữ liệu thực & $2\times$   & $1\times$  & $6\times$   \\
+    T10I4D100K  & Tổng hợp, thưa       & $8\times$   & $4\times$  & $9\times$   \\
+    T40I10D100K & Tổng hợp, dài        & $32\times$  & $21\times$ & $32\times$  \\
+    \midrule
+    Kosarak & Cực lớn, rất thưa & \multicolumn{3}{l}{\textit{SPMF không chạy được -- không so sánh được}} \\
+    \bottomrule
+\end{tabular}
+\caption{Bội số tăng tốc (speedup) của Julia~Opt so với SPMF Java. Speedup $= t_{\text{SPMF}} / t_{\text{Julia}}$. Giá trị min/max tương ứng minsup cao nhất/thấp nhất đo được. Pumsb đạt speedup lớn nhất nhờ avg\_len = 74 khuếch đại lợi thế BitArray AND.}
+\label{tab:speedup_summary}
+\end{table}
+
+\begin{figure}[H]
+\begin{minipage}[t]{0.67\textwidth}
+    \vspace{0pt}
+    \includegraphics[width=\linewidth]{speedup_radar.png}
+\end{minipage}%
+\hspace{0.03\textwidth}
+\begin{minipage}[t]{0.27\textwidth}
+    \vspace{1.5em}
+    \captionsetup{justification=raggedright,singlelinecheck=false,font=small}
+    \caption{Biểu đồ radar speedup của Julia~Opt so với SPMF, mỗi trục chuẩn hóa về giá trị max của trục đó. Đường xanh = trung vị; vùng hồng = dải min--max. Pumsb và Chess nổi bật nhất trên dense data.}
+    \label{fig:speedup_radar}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+\begin{minipage}[t]{0.67\textwidth}
+    \vspace{0pt}
+    \includegraphics[width=\linewidth]{speedup_bar.png}
+\end{minipage}%
+\hspace{0.03\textwidth}
+\begin{minipage}[t]{0.27\textwidth}
+    \vspace{1.5em}
+    \captionsetup{justification=raggedright,singlelinecheck=false,font=small}
+    \caption{Biểu đồ thanh nhóm speedup trung vị, tối thiểu và tối đa của Julia~Opt so với SPMF. Dense dataset (Chess, Pumsb, Mushroom) đạt mức tăng tốc vượt trội.}
+    \label{fig:speedup_bar}
+\end{minipage}
+\end{figure}
+
+\subsection{Sử dụng Bộ nhớ}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l r r r r}
+    \toprule
+    \textbf{Tập dữ liệu} & \textbf{minsup (\%)} & \textbf{Julia Opt (MiB)} & \textbf{Baseline (MiB)} & \textbf{Giảm} \\
+    \midrule
+    Chess       & 75\%  & 31.87    & 857.23 & $26.9\times$ \\
+    Connect     & 93\%  & --       & --     & -- \\
+    Mushroom    & 30\%  & 10.98    & 161.57 & $14.7\times$ \\
+    Pumsb       & 90\%  & --       & --     & -- \\
+    Accidents   & 80\%  & 165.16   & OOM    & -- \\
+    Retail      & 2\%   & 20.68    & OOM    & -- \\
+    T10I4D100K  & 0.8\% & 1\,215.2 & OOM    & -- \\
+    T40I10D100K & 2\%   & --       & OOM    & -- \\
+    Kosarak     & 0.8\% & --       & OOM    & -- \\
+    \bottomrule
+\end{tabular}
+\caption{Mức sử dụng RAM tối đa (peak allocation) của Julia Opt so với Baseline. OOM: Out of Memory.}
+\label{tab:memory}
+\end{table}
+
+\begin{figure}[H]
+\begin{minipage}[t]{0.67\textwidth}
+    \vspace{0pt}
+    \includegraphics[width=\linewidth]{memory.png}
+\end{minipage}%
+\hspace{0.03\textwidth}
+\begin{minipage}[t]{0.27\textwidth}
+    \vspace{1.5em}
+    \captionsetup{justification=raggedright,singlelinecheck=false,font=small}
+    \caption{Bộ nhớ đỉnh (peak memory) của Julia~Opt và Baseline trên 9 dataset. Thang trục $y$ logarithm. Baseline OOM trên 7 trong 9 tập. BitArray tiết kiệm ${\sim}64\times$ bộ nhớ mỗi tidset; \texttt{Dict}-based allocation loại bỏ lãng phí phân bổ theo max item ID.}
+    \label{fig:memory}
+\end{minipage}
+\end{figure}
+
+\textbf{Lý giải.} Baseline dùng \texttt{Vector\{Int\}} cho tidset: mỗi phần tử chiếm 8 byte (Int64). BitArray chiếm 1 bit mỗi transaction, tức $64\times$ ít hơn. Ngoài ra, Baseline dùng \texttt{Vector\{Bi-\\tArray\{1\}\}(undef, max\_item+1)} phân bổ mảng theo kích thước ID item lớn nhất, gây lãng phí nghiêm trọng khi ID item thưa (Retail có $\max(\mathcal{I}) = 16{,}470$). Cài đặt tối ưu dùng \texttt{Dict\{Int, BitArray\{1\}\}} chỉ phân bổ cho item thực sự frequent, khắc phục hoàn toàn vấn đề này.
+
+\subsection{Khả năng Mở rộng (Scalability)}
+\textbf{Phương pháp lấy mẫu.}
+Thực nghiệm dùng \textbf{uniform random sampling without replacement}
+(Fisher-Yates shuffle, seed = 42) để tạo các tập con 10\%--100\% từ Retail.
+Đây là phương pháp chuẩn trong benchmark FIM~\cite{goethals2004,fournier2016}
+vì transaction database thỏa hai điều kiện:
+\begin{enumerate}
+    \item \textit{I.I.D.}: mỗi giao dịch là giỏ hàng độc lập, không có
+          temporal ordering cần bảo toàn (khác với time-series).
+    \item \textit{Probability preservation}:
+          $\mathbb{E}[\mathrm{sup}(X,\,\text{sample}_k)]
+          = \dfrac{k}{N}\cdot\mathrm{sup}(X,\,\mathcal{D})$
+          . Tần suất đồng xuất hiện được bảo toàn theo kỳ vọng, nên
+          $\sigma_k = \lceil\text{minsup\_frac}\times k\rceil$ giữ nguyên
+          độ khó bài toán qua các mức kích thước.
+\end{enumerate}
+
+% Các phương pháp sampling chuyên biệt cho FIM (ISbFIM, ApproxFIM) phục vụ
+% mục tiêu khác -- khai thác \textit{approximate} frequent itemset trên big data
+% khi không đủ RAM -- không phải benchmark scalability~\cite{goethals2004}.
+
+\begin{figure}[H]
+\begin{minipage}[t]{0.67\textwidth}
+    \vspace{0pt}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \includegraphics[width=\linewidth]{scalability_by_pct.png}
+        \caption{Thời gian theo tỉ lệ kích thước tập con}
+        \label{fig:scalability_pct}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \includegraphics[width=\linewidth]{scalability_by_ntx.png}
+        \caption{Thời gian tuyệt đối (ms) theo số transaction}
+        \label{fig:scalability_ntx}
+    \end{subfigure}
+\end{minipage}%
+\hspace{0.03\textwidth}
+\begin{minipage}[t]{0.27\textwidth}
+    \vspace{1.5em}
+    \captionsetup{justification=raggedright,singlelinecheck=false,font=small}
+    \caption{Scalability trên Retail (tập con 10\%--100\% theo transaction, minsup = 1\% số transaction). Julia~Opt tăng gần tuyến tính; SPMF tăng tuyến tính với hệ số lớn hơn.}
+    \label{fig:scalability}
+\end{minipage}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{r r r r r}
+    \toprule
+    \textbf{Tỉ lệ (\%)} & \textbf{\#Transaction} & \textbf{minsup abs} & \textbf{Julia Opt (ms)} & \textbf{SPMF (ms)} \\
+    \midrule
+    10  & 8\,816  & 89 & 9.0  & 57.0 \\
+    25  & 22\,040 & 221 & 18.1 & 106.0 \\
+    50  & 44\,081 & 441 & 22.9 & 157.0 \\
+    75  & 66\,122 & 662 & 58.4 & 220.0 \\
+    100 & 88\,162 & 882 & 62.5 & 298.0 \\
+    \bottomrule
+\end{tabular}
+\caption{Số liệu scalability chi tiết trên Retail. Số lượng itemset phổ biến ổn định (~160) do minsup tuyệt đối tăng tỉ lệ với kích thước tập con.}
+\label{tab:scalability}
+\end{table}
+
+Xu hướng tăng tuyến tính xác nhận lý thuyết: khi $n$ tăng, mỗi phép AND BitArray tốn thêm $O(n/64)$ chu kỳ, còn số lượng itemset phổ biến giữ nguyên (vì minsup tương đối cố định). Do đó tổng thời gian tỉ lệ tuyến tính với $n$.
+
+\subsection{Ảnh hưởng của Độ dài Giao dịch}
+
+\begin{figure}[H]
+\begin{minipage}[t]{0.67\textwidth}
+    \vspace{0pt}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \includegraphics[width=\linewidth]{txlen_itemsets.png}
+        \caption{Số lượng tập phổ biến theo avg\_len}
+        \label{fig:txlen_itemsets}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \includegraphics[width=\linewidth]{txlen_runtime.png}
+        \caption{Thời gian chạy (ms) theo avg\_len}
+        \label{fig:txlen_runtime}
+    \end{subfigure}
+\end{minipage}%
+\hspace{0.03\textwidth}
+\begin{minipage}[t]{0.27\textwidth}
+    \vspace{1.5em}
+    \captionsetup{justification=raggedright,singlelinecheck=false,font=small}
+    \caption{Ảnh hưởng của độ dài giao dịch trung bình đến LCMFreq. Dataset tổng hợp: 5\,000 giao dịch, 100 mục, minsup = 30\%. Ngưỡng pha chuyển xuất hiện tại avg\_len $\approx 30$.}
+    \label{fig:txlen}
+\end{minipage}
+\end{figure}
+
+\textbf{Phân tích kết quả.} Với $n = 5{,}000$, $|\mathcal{I}| = 100$, và $\sigma = 30\% \Rightarrow \sigma_{\text{abs}} = 1{,}500$. Khi avg\_len $\leq 25$, mỗi mục xuất hiện trong xấp xỉ $\text{avg\_len}/|\mathcal{I}| \times n = 25/100 \times 5{,}000 = 1{,}250 < 1{,}500$ giao dịch; không có mục nào đủ ngưỡng, output rỗng. Khi avg\_len $\geq 30$, kỳ vọng support vượt ngưỡng và các tập phổ biến bắt đầu xuất hiện. Đây là \textbf{ngưỡng pha chuyển (phase transition)} của bài toán FIM, nơi hành vi output thay đổi đột ngột.
+
+\subsection{Phân tích Điểm mạnh và Hạn chế}
+
+\textbf{Điểm mạnh.}
+\begin{enumerate}
+    \item Tốc độ vượt trội so với SPMF trên mọi cấu hình thực nghiệm.
+    \item Tiết kiệm bộ nhớ đáng kể, cho phép chạy trên Retail và Accidents mà baseline không thể.
+    \item 100\% chính xác, đơn giản và dễ đọc code (tận dụng đặc trưng Julia: \texttt{..\&}, \texttt{count}, \texttt{BitArray}).
+\end{enumerate}
+
+\textbf{Hạn chế và Đề xuất Tối ưu Tiếp theo.}
+\begin{enumerate}
+    \item \textit{Bộ nhớ cao với T10I4D100K (1.2 GiB):} Vì $n = 100{,}000$, mỗi BitArray chiếm $100{,}000/8 = 12{,}500$ byte. Với nhiều mục phổ biến, tổng bộ nhớ tidset lớn. Hướng cải thiện: áp dụng \textbf{diffset} (lưu sai biệt giữa tidset cha và con) thay vì toàn bộ tidset, giảm bộ nhớ khi support gần bằng support cha.
+    \item \textit{Chưa tận dụng multi-threading:} DFS về bản chất độc lập trên các nhánh con. Có thể chia nhánh top-level cho nhiều luồng Julia (\texttt{Threads.@spawn}) để tận dụng CPU đa nhân.
+\end{enumerate}
+
+
+% ============================================================
+\section{ỨNG DỤNG: PHÂN TÍCH GIỎ HÀNG}
+% ============================================================
+
+\subsection{Mô tả Ứng dụng}
+
+\gls{mba} là ứng dụng FIM kinh điển nhất: phân tích hành vi mua sắm của khách hàng để tìm các sản phẩm thường được mua cùng nhau. Kết quả là các \gls{assoc} dạng $X \Rightarrow Y$ với support và \gls{confidence} cao. Ứng dụng được thực hiện trên dataset Retail -- một transaction database thực từ siêu thị Bỉ.
+
+Từ tập frequent itemset $\mathcal{F}$ (khai thác bằng LCMFreq), ta sinh association rule: với mỗi $X \in \mathcal{F}$ và $\emptyset \neq Y \subset X$, luật $Y \Rightarrow (X \setminus Y)$ thỏa mãn nếu:
+\begin{align}
+    \conf(Y \Rightarrow X \setminus Y) &= \frac{\supp(X)}{\supp(Y)} \geq \text{minconf} \\
+    \mathrm{lift}(Y \Rightarrow X \setminus Y) &= \frac{\conf(Y \Rightarrow X \setminus Y)}{\supp_{\mathrm{rel}}(X \setminus Y)} > 1
+\end{align}
+
+Với lift $> 1$: các mục trong $Y$ và $X \setminus Y$ có xu hướng đồng xuất hiện nhiều hơn ngẫu nhiên.
+
+\subsection{Thiết lập Thực nghiệm}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l l}
+    \toprule
+    \textbf{Tham số} & \textbf{Giá trị} \\
+    \midrule
+    Dataset               & Retail (88\,162 transaction) \\
+    Ngưỡng minsup         & 0.5\% ($\sigma = 441$ transaction) \\
+    Số frequent itemset thu được & 580 itemset \\
+    Ngưỡng minconf        & 0.6 (60\%) \\
+    Số association rule sinh được & 312 rule \\
+    \bottomrule
+\end{tabular}
+\caption{Thiết lập thực nghiệm Market Basket Analysis trên dataset Retail}
+\label{tab:mba_setup}
+\end{table}
+
+\subsection{Top Luật kết hợp theo Lift}
+
+Bảng~\ref{tab:top_rules} trình bày 10 association rule có \gls{lift} cao nhất. Lưu ý: dataset Retail mã hóa sản phẩm bằng số nguyên (item ID), không có nhãn tên sản phẩm trong dữ liệu công khai.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l l r r r}
+    \toprule
+    \textbf{Vế trái ($Y$)} & \textbf{Vế phải ($X \setminus Y$)} & \textbf{Sup (\%)} & \textbf{Conf} & \textbf{Lift} \\
+    \midrule
+    \{38, 39\}     & \{41\}    & 1.01\% & 0.89 & 8.7 \\
+    \{38\}         & \{39, 41\} & 1.01\% & 0.82 & 8.1 \\
+    \{39, 41\}     & \{38\}    & 1.01\% & 0.80 & 7.9 \\
+    \{38, 41\}     & \{39\}    & 1.01\% & 0.78 & 7.7 \\
+    \{39\}         & \{38\}    & 1.18\% & 0.73 & 7.2 \\
+    \{41\}         & \{38, 39\} & 1.01\% & 0.71 & 7.0 \\
+    \{41\}         & \{39\}    & 1.43\% & 0.69 & 6.8 \\
+    \{38\}         & \{39\}    & 1.18\% & 0.68 & 6.7 \\
+    \{32\}         & \{48\}    & 0.72\% & 0.78 & 6.4 \\
+    \{48\}         & \{32\}    & 0.72\% & 0.63 & 5.2 \\
+    \bottomrule
+\end{tabular}
+\caption{Top 10 association rule theo lift trên dataset Retail ($\sigma = 0.5\%$, minconf $= 0.6$). Nhóm item \{38, 39, 41\} là nhóm sản phẩm thường xuyên được mua cùng nhau nhất.}
+\label{tab:top_rules}
+\end{table}
+
+\subsection{Phân tích và Ý nghĩa}
+
+\textbf{Nhóm sản phẩm \{38, 39, 41\}.} Lift $> 7$ cho thấy xác suất đồng xuất hiện cao gấp 7 lần so với ngẫu nhiên. Đây là candidate mạnh cho chiến lược bundling (bán theo gói) hoặc đặt gần nhau trên kệ. Mặc dù dataset Retail không cung cấp tên sản phẩm, pattern này thực sự tồn tại trong dữ liệu siêu thị gốc.
+
+\textbf{Nhóm \{32, 48\}.} Lift $\approx 5{,}2$--$6{,}4$ cho thấy mối tương quan đáng kể. Rule $\{32\} \Rightarrow \{48\}$ với confidence 78\%: trong số khách hàng mua item 32, có 78\% cũng mua item 48 -- thông tin hữu ích cho đề xuất sản phẩm (recommendation) thời điểm thanh toán.
+
+\textbf{Tính phổ biến thấp (0.5\%--1.5\%).} Đây là đặc trưng của dataset Retail: rất thưa, hầu hết khách hàng chỉ mua một vài sản phẩm bất kỳ. Tuy nhiên, với 88\,162 transaction, 1\% tương đương 882 khách hàng -- vẫn đủ có ý nghĩa thống kê để đưa ra quyết định kinh doanh.
+
+\textbf{Ứng dụng thực tiễn.}
+\begin{enumerate}
+    \item \textit{Bố trí kệ hàng:} Đặt sản phẩm 38, 39, 41 gần nhau để tiện lợi và tăng bán chéo.
+    \item \textit{Khuyến mãi kết hợp:} Giảm giá gói \{38, 39, 41\} để tăng giá trị đơn hàng.
+    \item \textit{Gợi ý sản phẩm online:} Khi khách thêm sản phẩm 32 vào giỏ hàng, hệ thống gợi ý thêm sản phẩm 48.
+    \item \textit{Quản lý tồn kho:} Dự báo nhu cầu đồng thời của các sản phẩm liên kết.
+\end{enumerate}
+
+
+% ============================================================
+% REFERENCES
+% ============================================================
+\newpage
+\begin{thebibliography}{99}
+
+\bibitem{uno2004}
+T. Uno, M. Kiyomi, and H. Arimura,
+\textit{``LCM ver.2: Efficient Mining Algorithms for Frequent/Closed/Maximal Itemsets,''}
+in \textit{Proceedings of IEEE ICDM Workshop on Frequent Itemset Mining Implementations (FIMI 2004)},
+Brighton, UK, 2004.
+
+\bibitem{agrawal1994}
+R. Agrawal and R. Srikant,
+\textit{``Fast Algorithms for Mining Association Rules,''}
+in \textit{Proceedings of the 20th International Conference on Very Large Data Bases (VLDB 1994)},
+pp. 487--499, Santiago, Chile, 1994.
+
+\bibitem{han2000}
+J. Han, J. Pei, and Y. Yin,
+\textit{``Mining Frequent Patterns without Candidate Generation,''}
+in \textit{Proceedings of the 2000 ACM SIGMOD International Conference on Management of Data},
+pp. 1--12, Dallas, TX, 2000.
+
+\bibitem{zaki1997}
+M. J. Zaki, S. Parthasarathy, M. Ogihara, and W. Li,
+\textit{``New Algorithms for Fast Discovery of Association Rules,''}
+in \textit{Proceedings of the 3rd International Conference on Knowledge Discovery and Data Mining (KDD 1997)},
+pp. 283--286, Newport Beach, CA, 1997.
+
+\bibitem{fournier2016}
+P. Fournier-Viger, J. C.-W. Lin, R. U. Kiran, Y. S. Koh, and R. Thomas,
+\textit{``A Survey of Sequential Pattern Mining,''}
+\textit{Data Science and Pattern Recognition}, vol. 1, no. 1, pp. 54--77, 2017.
+
+\bibitem{goethals2004}
+B. Goethals,
+\textit{``Survey on Frequent Pattern Mining,''}
+Manuscript, University of Helsinki, 2004.
+
+\bibitem{srikant1995}
+R. Srikant and R. Agrawal,
+\textit{``Mining Generalized Association Rules,''}
+in \textit{Proceedings of the 21st International Conference on Very Large Data Bases (VLDB 1995)},
+pp. 407--419, Zurich, Switzerland, 1995.
+
+\end{thebibliography}
+
+\end{document}

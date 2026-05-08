@@ -1,0 +1,1184 @@
+LCM ver. 2: Eﬃcient Mining Algorithms for
+Frequent/Closed/Maximal Itemsets
+Takeaki Uno1, Masashi Kiyomi1, Hiroki Arimura2
+1 National Institute of Informatics 2-1-2 Hitotsubashi, Chiyoda-ku, Tokyo, 101-8430, Japan
+e-mail:
+uno@nii.jp, masashi@grad.nii.ac.jp
+2 Information Science and Technology, Hokkaido University
+Kita 14-jo Nishi 9-chome, 060-0814 Sapporo, JAPAN, e-mail:
+arim@ist.hokudai.ac.jp
+Abstract:
+For a transaction database, a frequent
+itemset is an itemset included in at least a speciﬁed
+number of transactions.
+A frequent itemset P
+is maximal if P is included in no other frequent
+itemset, and closed if P is included in no other
+itemset included in the exactly same transactions
+as P.
+The problems of ﬁnding these frequent
+itemsets are fundamental
+in data mining,
+and
+from the applications,
+fast implementations for
+solving the problems are needed.
+In this paper,
+we propose eﬃcient algorithms LCM (Linear time
+Closed itemset Miner),
+LCMfreq and LCMmax
+for these problems.
+We show the eﬃciency of our
+algorithms by computational experiments compared
+with existing algorithms.
+1
+Introduction
+Frequent item set mining is one of the fundamental
+problems in data mining and has many applications
+such as association rule mining, inductive databases,
+and query expansion. From these applications, fast
+implementations of frequent itemset mining problems
+are needed.
+In this paper, we propose the second
+versions of LCM, LCMfreq and LCMmax, for enu-
+merating closed, all and maximal frequent itemsets.
+LCM is an abbreviation of Linear time Closed item
+set Miner.
+In FIMI03[7], we proposed the ﬁrst version of
+LCM, which is for enumerating frequent closed item-
+sets. LCM uses preﬁx preserving closure extension
+(ppc extension in short), which is an extension from
+a closed itemset to another closed itemset. The ex-
+tension induces a search tree on the set of frequent
+closed itemsets, thereby we can completely enumer-
+ate closed itemsets without duplications. Generating
+a ppc extension needs no previously obtained closed
+itemset. Hence, the memory use of LCM does not
+depend on the number of frequent closed itemsets,
+even if there are many frequent closed itemsets.
+The time complexity of LCM is theoretically
+bounded by a linear function in the number of fre-
+quent closed itemsets, while the existing algorithms
+are not.
+We further developed algorithms for the
+frequency counting, occurrence deliver and hybrid of
+diﬀsets. They reduce the practical computation time
+eﬃciently. Moreover, the framework of LCM is sim-
+ple.
+Generating ppc extensions needs no sophisti-
+cated data structure such as binary trees. LCM is
+implemented with only arrays. Therefore, LCM is
+fast, and outperforms than other algorithms for some
+sparse datasets.
+However, LCM does not have any routine for re-
+ducing the database, while many existing algorithms
+have. Thus, the performance of LCM is not good for
+dense datasets with large minimum supports, which
+involve many unnecessary items and transactions.
+At FIMI03, we also proposed modiﬁcations of LCM,
+LCMfreq and LCMmax, for enumerating all frequent
+itemsets and maximal frequent itemsets. Although
+they are fast for some instances, if LCM is not fast
+for an instance, they are also not fast for the instance.
+Existing maximal frequent itemset mining algorithms
+have eﬃcient pruning methods to reduce the number
+of iterations, while LCMmax does not have. It is also
+a reason of the slowness of LCMmax.
+This paper proposes the second version of LCM
+algorithms. We added database reduction to LCM,
+so that problems of dense datasets can be solved in
+short time. The second version of LCMmax includes
+a pruning method, thus the computation time is re-
+duced when the number of maximal frequent itemsets
+is small. We further developed new algorithms for
+checking the maximality of a frequent itemset and
+1
+for taking the closure of an itemset.
+We compare
+the performance of LCM algorithms and other algo-
+rithms submitted to FIMI03 by computational exper-
+iments. In many instances, LCM algorithms perform
+above other algorithms.
+The organization of the paper is as follows. Sec-
+tion 2 introduces preliminaries. The main algorithms
+and practical techniques of LCM algorithms are de-
+scribed in Section 3. Section 4 shows the results of
+computational experiments, and Section 5 concludes
+the paper.
+2
+Preliminaries
+Let I = {1, ..., n} be the set of items. A transaction
+database on I is a set T = {t1, . . . , tm} such that each
+ti is included in I. Each ti is called a transaction. We
+denote by ||T || the sum of sizes of all transactions in
+T , that is, the size of database T . A set P ⊆I is
+called an itemset.
+For itemset P, a transaction including P is called
+an occurrence of P. The denotation of P, denoted
+by T (P) is the set of the occurrences of P. |T (P)| is
+called the frequency of P, and denoted by frq(P). For
+given constant θ, called a minimum support, itemset
+P is frequent if frq(P) ≥θ. If a frequent itemset P
+is included in no other frequent itemset, P is called
+maximal. For any itemsets P and Q, T (P ∪Q) =
+T (P)∩T (Q) holds, and if P ⊆Q then T (Q) ⊆T (P).
+An itemset P is called closed if no other itemset Q
+satisﬁes T (P) = T (Q), P ⊆Q.
+Given set S ⊆T of transactions, let I(S) be the set
+of items common to all transactions in S, i.e., I(S) =
+T
+T ∈S T. Then, we deﬁne the closure of itemset P
+in T , denoted by clo(P), by I(T (P))(= T
+t∈T (P ) t).
+For every pair of itemsets P and Q, the following
+properties hold[13, 14].
+(1) If P ⊆Q, then clo(P) ⊆clo(Q).
+(2) If T (P) = T (Q), then clo(P) = clo(Q).
+(3) clo(clo(P)) = clo(P).
+(4) clo(P) is the unique smallest closed itemset
+including P.
+(5) A itemset P is a closed itemset if and only
+if clo(P) = P.
+For itemset P and item i ∈P, let P(i) = P ∩
+{1, . . . , i} be the subset of P consisting only of el-
+ements no greater than i, called the i-preﬁx of P.
+An itemset Q is a closure extension of an itemset
+P if Q = clo(P ∪{i}) holds for some i ̸∈P.
+If
+Q is a closure extension of P, then Q ⊃P, and
+frq(Q) < frq(P). We call the item with the maxi-
+mum index in P the tail of P, and denote by tail(P).
+3
+Algorithms for Eﬃcient Enu-
+meration
+In this section, we explain the techniques used in the
+second versions of LCM algorithms. We explain them
+one-by-one with comparing to the techniques used
+by the other algorithms, in the following subsections.
+The new techniques used in the second version are:
+3.2. new database reduction (reduce the frequency
+counting cost)
+3.6. database reduction for fast checking closedness
+3.8. database reduction for fast checking maximality
+3.7. new pruning algorithm for backtracking-based
+maximal frequent itemset mining.
+The techniques also used in the ﬁrst versions are:
+3.4. occurrence deliver (compute frequency in
+linear time)
+3.5. ppc extension (generates closed itemsets with
+neither memory nor duplication)
+3.3. hypercube decomposition (fast enumeration by
+grouping frequent itemsets by equivalence class).
+The techniques used in the existing algorithms and
+the ﬁrst version have citations to the previous papers.
+3.1
+Enumerating Frequent Itemsets
+Any itemset included in a frequent itemset is it-
+self frequent.
+Thereby, the property “frequent” is
+monotone. From this, we can construct any frequent
+itemset from the empty set by adding items one-by-
+one without passing through any infrequent itemset.
+Roughly speaking, the existing algorithms are classi-
+ﬁed into two groups, and algorithms in both groups
+use this property.
+The ﬁrst group is so called apriori or level-by-level
+algorithms [1, 2]. Let Dk be the set of frequent item-
+sets of size k. Apriori algorithms start with D0, that
+is {∅}, and compute Dk from Dk−1 in the increasing
+order of k from k = 1. Any itemset in Dk is obtained
+from an itemset of Dk−1 by adding an item. Apriori
+algorithms add every item to each itemset of Dk−1,
+and choose frequent itemsets among them. If Dk = ∅
+holds for some k, then Dk′ = ∅holds for any k′ > k.
+Thus, apriori algorithms stop at such k. This is the
+scheme of apriori algorithms.
+2
+The
+other
+group
+is
+so
+called
+backtracking
+algorithms[3, 18, 19].
+Backtracking algorithm is
+based on recursive calls. An iteration of a backtrack-
+ing algorithm inputs a frequent itemset P, and gener-
+ates itemsets by adding every items to P. Then, for
+each itemset being frequent among them, the itera-
+tion generates recursive calls with respect to it. To
+avoid duplications, an iteration of backtracking algo-
+rithms adds items with indices larger than the tail
+of P.
+We describe the framework of backtracking
+algorithms as follows.
+ALGORITHM BackTracking (P:current solution)
+1. Output P
+2. For each e ∈I, e > tail(P) do
+3.
+If P ∪{e} is frequent then
+call BackTracking (P ∪{e})
+An execution of backtracking algorithms gives a
+tree structure such that the vertices of the tree are
+iterations, and edges connect two iterations if one of
+the iteration calls the other. If an iteration I recur-
+sively calls another iteration I′, then we say that I
+is the parent of I′, and I′ is a child of I. For an iter-
+ation, the itemset received from the parent is called
+the current solution.
+Apriori algorithms use much memory for storing
+Dk in memory, while backtracking algorithms use
+less memory since they keep only the current solu-
+tion. Backtracking algorithms need no computation
+for maintaining previously obtained itemsets, so the
+computation time of backtracking algorithms is gen-
+erally short.
+However, apriori algorithms have ad-
+vantages for the frequency counting.
+LCM algorithms are based on backtracking al-
+gorithms, and use an eﬃcient techniques for the
+frequency counting, which are occurrence deliver
+and anytime database reduction described below.
+Hence, LCM algorithms compute the frequency eﬃ-
+ciently without keeping previously obtained itemsets
+in memory.
+3.2
+Maintaining Databases
+In the existing studies, database reduction is said to
+be important to reduce the computation time. It is
+to reduce the input database as the following rules:
+1. remove each item included in less than θ transactions
+2. remove each item included in all transactions
+3. merge the identical transactions into one.
+Database reduction performs well when the mini-
+mum support is large, and many existing algorithms
+use it. LCM algorithms also use database reduction.
+In the existing studies, the input databases are
+often stored and maintained by using FP-tree (fre-
+quent pattern tree), which is a version of preﬁx tree
+(trie) [9]. By using FP-tree, we can search speciﬁed
+transactions from the datasets eﬃciently.
+FP-tree
+compresses the common preﬁx, so we can decrease
+the memory use. In addition, FP-tree can detect the
+identical transactions, thus we can merge them into
+one. This merge accelerates the frequency counting.
+From these reasons, FP-trees are used in many algo-
+rithms and implementations.
+Although FP-tree has many good advantages, we
+do not use it in the implementation of LCM, but use
+simple arrays. The main reason is that LCM does
+not have to search transactions in the database. The
+main operation of LCM is tracing the transactions in
+the the denotation of the current solution. Thus, we
+do not need to use sophisticated data structures for
+searching.
+The other reason is the computation time for the
+initialization. If we use a standard binary tree for
+implementing FP-tree, the initialization of the in-
+put database takes O(||T || + |T | log |T |) time.
+for
+constructing FP-tree in memory. Compared to this,
+LCM detects the identical transactions and stores
+the database in memory within linear time of the
+database size. This is because that LCM uses radix
+sort for this task, which sorts the transactions in a
+lexicographic order in linear time.
+In general, the
+datasets of data mining problems have many trans-
+actions, and each transaction has few items. Thus,
+||T || is usually smaller than |T | log |T |, and LCM has
+an advantage. The constant factors of the compu-
+tation time of binary tree operations are relatively
+larger than that of array operations. LCM also has
+an advantage at this point.
+Again, we recall that
+LCM never search the transactions, so each opera-
+tion required by LCM can be done in constant time.
+FP-tree has an advantage in reducing the memory
+use.
+This memory reduction can also reduce the
+computation time of the frequency counting.
+To
+check the eﬃciency of the reduction, we checked
+the reduction ratio by FP-tree for some datasets
+examined in FIMI03. The result is shown in Table
+1. Each cell shows the ratio of the number of items
+needed to be stored by arrays and FP-tree. Usually,
+the input database is reduced in each iteration,
+hence we sum up the numbers over all iterations to
+compute the ratio. In the results of our experiments,
+3
+the ratio was not greater 3 in many instances.
+If
+|I| is small, |T | is large, and the dataset has a
+randomness, such as accidents, the ratio was up to 6.
+Generally, a binary tree uses memory three times as
+much as an array. Thus, the performance of FP-tree
+seems to be not quite good rather than an array in
+both memory use and computation time, for many
+datasets.
+3.3
+Hypercube Decomposition
+LCM ﬁnds a number of frequent itemsets at once for
+reducing the computation time[18]. Since the item-
+sets obtained at once compose a hypercube in the
+itemset lattice, we call the technique hypercube de-
+composition.
+For a frequent itemset P, let H(P)
+be the set of items e satisfying e > tail(P) and
+T (P) = T (P ∪{e}).
+Then, for any Q ⊆H(P),
+T (P ∪Q) = T (P) holds, and P ∪Q is frequent.
+LCMfreq uses this property. For two itemsets P and
+P ∪Q, we say that P ′ is between P and P ∪Q if
+P ⊆P ′ ⊆P ∪Q. In the iteration with respect to
+P, we output all P ′ between P and P ∪H(P). This
+saves about 2|H(P )| times of the frequency counting.
+To avoid duplications, we do not generate recur-
+sive calls with respect to items included in H(P).
+Instead of generating these recursive calls, we output
+frequent itemsets including items of H(P) in recur-
+sive calls with respect to items not included in H(P).
+When the algorithm generates a recursive call with
+respect to e ̸∈H(P), we pass H(P) to it. In the re-
+cursive call, we output all itemsets between P ∪{e}
+and P ∪{e} ∪H(P) ∪H(P ∪{e}). Since any itemset
+Q satisﬁes T (P ∪Q ∪H(P)) = T (P ∪Q), the item-
+sets output in the recursive calls are frequent. We
+describe hypercube decomposition as follows.
+ALGORITHM HypercubeDecomposition
+(P:current solution, S:itemset)
+S′ := S ∪H(P)
+Output all itemsets including P
+and included in P ∪S′
+For each item e ∈I \ (P ∪S′), e > tail(P) do
+If P ∪{e} is frequent then
+call HypercubeDecomposition (P ∪{e}, S′)
+End for
+3.4
+Frequency Counting
+Generally, the most heavy part of the frequent item-
+set mining is the frequency counting, which is to
+count the number of transactions including a newly
+generated itemset. To reduce the computation time,
+existing algorithms uses down project. For an itemset
+P, down project computes its denotation T (P) by us-
+ing two subsets P1 and P2 of P. If P = P1 ∪P2, then
+T (P) = T (P1)∩T (P2). Under the condition that the
+items of P1 and P2 are sorted by their indices, the in-
+tersection can be computed in O(|T (P1)| + |T (P2)|)
+time. Down project uses this property, and computes
+the denotations quickly. Moreover, if |T (P1)| < θ or
+|T (P2)| < θ holds, we can see that P never be fre-
+quent. It also helps to reduce the computation time.
+Apriori-type algorithms accelerates the frequency
+counting by ﬁnding a good pair P1 and P2 of subsets
+of P, such that |T (P1)| + |T (P2)| is small, or either
+P1 or P2 is infrequent. Backtracking algorithm adds
+an item e to the current solution P in each itera-
+tion, and compute its denotation. By using T ({e}),
+the computation time for the frequency counting is
+reduced to O(P
+e>tail(P )(|T (P)| + |T ({e})|)).
+The bitmap method[5] is a technique for speed-
+ing up the computation of taking the intersection in
+down project. It uses a bitmap image (the charac-
+teristic vector) of the denotations. To take the in-
+tersection, we have to take O(|T |) time with bitmap.
+However, a 32bit CPU can take the intersection of
+32bits at once, thus roughly speaking the computa-
+tion time is reduced to 1/32.
+This method has a
+disadvantage for sparse datasets, and is not orthog-
+onal to anytime database reduction described in the
+below. From the results of the experiments in FIMI
+03, bitmap method seems to be not good for sparse
+large datasets.
+LCM algorithms use another method for the fre-
+quency counting, called occurrence deliver[18, 19].
+Occurrence deliver computes the denotations of P ∪
+{e} for e = tail(P) + 1, ..., |I| at once by tracing
+transactions in T (P). It use a bucket for each e to
+be added, and set them to empty set at the begin-
+ning. Then, for each transaction t ∈T (P), occur-
+rence deliver inserts t to the bucket of e for each
+e ∈t, e > tail(P). After these insertions, the bucket
+of e is equal to T (P ∪{e}). For each transaction t,
+occurrence deliver takes O(|t ∩{tail(P) + 1, ..., |I|}|)
+time. Thus, the computation time is O(P
+T ∈T (P ) |T ∩
+{tail(P)+1, ..., |I|}|) =O(|T (P)|+P
+e>tail(P ) |T (P ∪
+{e})|). This time complexity is smaller than down
+project. We describe the pseudo code of occurrence
+deliver in the following.
+ALGORITHM OccurrenceDeliver
+(T:database, P:itemset)
+1. Set Bucket[e] := ∅for each item e > tail(P)
+4
+dataset and
+chess
+accidents
+BMS-WebView2
+T40I10D100K
+minimum support
+40%
+30%
+0.05%
+0.1%
+reduction factor
+by FP-tree
+2.27
+6.01
+1.9
+1.57
+reduction factor by
+Hypercube decomposition
+6.25
+1
+1.21
+1
+reduction factor
+by apriori (best)
+1.11
+1.34
+1.35
+2.85
+Table 1: Eﬃciency test of FP-tree, hypercube decomposition, and apriori: the reduction factor of FP-tree is
+(sum of # of elements in reduced database by LCM) / ( sum of # of elements in reduced database by FP-tree),
+over all iterations, the reduction ratio of hypercube decomposition is the average number of output frequent
+itemsets in an iteration, and the reduction ratio of apriori is (sum of P
+e>tail(P ) |T (P ∪{e})|)
+/
+(sum of
+P
+e>F (P ) |T (P ∪{e})|), over all iterations.
+2. For each transaction t ∈T (P) do
+3.
+For each item e ∈t, e > tail(P) do
+4.
+Insert t to Bucket[e]
+5.
+End for
+6. End for
+7. Output Bucket[e] for all e > tail(P)
+Let F(P) be the set of items e such that e >
+tail(P) and P ∪{e} is frequent. Apriori algorithms
+have possibility to ﬁnd out in short time that P ∪{e}
+is infrequent, thus, in the best case, their computa-
+tion time can be reduced to O(P
+e∈F (P ) |T (P ∪{e})|).
+If P
+e>tail(P ),e̸∈F (P ) |T (P ∪{e})| is large, occurrence
+deliver will be slow.
+To decrease P
+e>tail(P ),e̸∈F (P ) |T (P ∪{e})|, LCM
+algorithms sort indices of items e in the increasing
+order of |T ({e})|.
+As we can see in Table 1, this
+sort reduces P
+e>tail(P ),e̸∈F (P ) |T (P ∪{e})| to 1/4 of
+P
+e>tail(P ) |T (P ∪{e})| in many cases. Since apriori
+algorithms take much time to maintain previously
+obtained itemsets, the possibility of speeding up by
+apriori algorithms is not so large.
+LCM algorithms further speeds up the frequency
+counting by iteratively reducing the database. Sup-
+pose that an iteration I of a backtracking algorithm
+receives a frequent itemset P from its parent. Then,
+in any descendant iteration of I, no item of indices
+smaller than tail(P) is added. Hence, any such item
+can be removed from the database while the exe-
+cution of the descendant iterations.
+Similarly, the
+transactions not including P never include the cur-
+rent solution of any descendant iteration, thus such
+transactions can be removed while the execution of
+the descendant iterations. Indeed, infrequent items
+can be removed, and the identical transactions can
+be merged.
+According to this, LCM algorithms recursively re-
+duce the database while the execution of recursive
+calls. Before the recursive call, LCM algorithms gen-
+erate a reduced database according to the above dis-
+cussion, and pass it to the recursive call. We call this
+technique anytime database reduction.
+Anytime database reduction reduces the compu-
+tation time of the iterations located at the lower
+levels of the recursion tree.
+In the recursion tree,
+many iterations are on the lower levels and few
+iterations are on the upper levels.
+Thus, anytime
+database reduction is expected to be eﬃcient.
+In
+our experiments, anytime database reduction works
+quite well. The following table shows the eﬃciency
+of anytime database reduction. We sum up over all
+iterations the sizes of the database received from
+the parent, in both cases with anytime database
+reduction and without anytime database reduction.
+Each cell shows the sum. The reduction ratio is large
+especially if the dataset is dense and the minimum
+support is large.
+3.5
+Preﬁx Preserving Closure Exten-
+sion
+Many existing algorithms for mining closed itemsets
+are based on frequent itemset mining. That is, the
+algorithms enumerate frequent itemsets, and output
+those being closed. This approach is eﬃcient when
+the number of frequent itemsets and the number of
+frequent closed itemsets diﬀer not so much.
+How-
+ever, if the diﬀerence between them is large, the algo-
+rithms generate many non-closed frequent itemsets,
+5
+dataset and
+connect
+pumsb
+BMS-WebView2
+T40I10D100K
+minimum support
+50%
+60%
+0.1%
+0.03%
+Database reduction
+188319235
+2125460007
+2280260
+1704927639
+Anytime database reduction
+538931
+7777187
+521576
+77371534
+Reduction factor
+349.4
+273.2
+4.3
+22.0
+Table 2: Accumulated number of transactions in database in all iterations
+thus they will be not eﬃcient. Many pruning meth-
+ods have been developed for speeding up, however
+they are not complete. Thus, the computation time
+is not bounded by a linear function in the number of
+frequent closed itemsets. There is a possibility of over
+linear increase of computation time in the number of
+output.
+LCM uses preﬁx preserving closure extension (ppc-
+extension in short) for generating closed itemsets[18,
+19].
+For a closed itemset P, we deﬁne the closure
+tail clo tail(P) by the item i of the minimum index
+satisfying clo(P(i)) = P.
+clo tail(P) is always in-
+cluded in P. We say that P ′ is a ppc extension of P
+if P ′ = clo(P ∪{e}) and P ′(e−1) = P(e−1) hold for
+an item e > clo tail(P). Let P0 be the itemset satis-
+fying T (P ′) = T . Any closed itemset P ′ ̸= P0 is a
+ppc extension of another closed itemset P, and such
+P is unique for P ′. Moreover, the frequency of P is
+strictly larger than P ′, hence ppc extension induces a
+rooted tree on frequent closed itemsets. LCM starts
+from P0, and ﬁnds all frequent closed itemsets in a
+depth ﬁrst manner by recursively generating ppc ex-
+tensions. The proof of ppc extension algorithms are
+described in [18, 19].
+By ppc extension, the time complexity is bounded
+by a linear function in the number of frequent closed
+itemsets. Hence, the computation time of LCM never
+be super linear in the number of frequent closed item-
+sets.
+3.6
+Closure Operation
+To enumerate closed itemsets, we have to check
+whether the current solution P is a closed itemset
+or not. In the existing studies, there are two meth-
+ods for this task.
+The ﬁrst method is to store in
+memory previously obtained itemsets which are cur-
+rently maximal among itemsets having the identical
+denotation. In this method, we ﬁnd frequent itemsets
+one-by-one, and store them in memory with remov-
+ing itemsets included in another itemset having the
+identical denotation. After ﬁnding all frequent item-
+sets, only closed itemsets remain in memory. We call
+this storage method. The second method is to gener-
+ate the closure of P. By adding to P all items e such
+that frq(P) = frq(P ∪{e}), we can construct the
+closure of P. We call the second closure operation.
+LCM uses closure operations for generating ppc ex-
+tensions. Similar to the frequency counting, we use
+database reduction for closure operation.
+Suppose
+that the current solution is P, the reduced database
+is composed of transactions S1, ..., Sh, and each Sl is
+obtained from transactions T l
+1, ..., T l
+k of the original
+database. For each Sl, we deﬁne the interior inter-
+section In(Sl) by T
+T ∈{T l
+1,...,T l
+k} T. Here the closure
+of P is equal to T
+S∈{S1,...,Sh} In(S). Thus, by using
+interior intersections, we can eﬃciently construct the
+closure of P.
+When
+we
+merge
+transactions
+to
+reduce
+the
+database, interior intersections can be updated eﬃ-
+ciently, by taking the intersection of their interior in-
+tersections. In the same way as the frequency count-
+ing, we can remove infrequent items from the interior
+intersections for more reduction. The computation
+time for the closure operation in LCM depends on
+the size of database, but not on the number of previ-
+ously obtained itemsets. Thus, storage method has
+advantages if the number of frequent closed itemsets
+is small.
+However, for the instances with a lot of
+frequent closed itemsets, which take long time to be
+solved, LCM has an advantage.
+3.7
+Enumerating Maximal Frequent
+Itemsets
+Many existing algorithms for maximal frequent item-
+set enumeration are based on the enumeration of fre-
+quent itemsets.
+In breadth-ﬁrst manner or depth-
+ﬁrst manner, they enumerate frequent itemsets and
+output maximal itemsets among them. To reduce the
+computation time, the algorithms prune the unnec-
+essary itemsets and recursive calls.
+Similar to these algorithms, LCMmax enumerates
+closed itemsets by backtracking, and outputs maxi-
+mal itemsets among them. It uses a pruning to cut
+oﬀunnecessary branches of the recursion. The prun-
+ing is based on a re-ordering of the indices of items,
+in each iteration. We explain the re-ordering in the
+6
+following.
+Let us consider a backtracking algorithm for enu-
+merating frequent itemsets. Let P be the current so-
+lution of an iteration of the algorithm. Suppose that
+P ′ is a maximal frequent itemset including P. LCM-
+max puts new indices to items with indices larger
+than tail(P) so that any item in P ′ has an index
+larger than any item not in P ′. Note that this re-
+ordering of indices has no eﬀect to the correctness of
+the algorithm.
+Let e > tail(P) be an item in P ′, and consider the
+recursive call with respect to P ∪{e}. Any frequent
+itemset ˆP found in the recursive call is included in
+P ′, since every item having an index larger than e
+is included in P ′, and the recursive call adds to P
+items only of indices larger than e. From this, we
+can see that by the re-ordering of indices, recursive
+calls with respect to items in P ′ ∩H generates no
+maximal frequent itemset other than P ′.
+According to this, an iteration of LCMmax chooses
+an item e∗∈H, and generates a recursive call with
+respect to P ∪{e∗} to obtain a maximal frequent
+itemset P ′. Then, re-orders the indices of items other
+than e∗as the above, and generates recursive calls
+with respect to each e > tail(P) not included in P ′ ∪
+{e∗}. In this way, we save the computation time for
+ﬁnding P ′, and by ﬁnding a large itemset, increase
+the eﬃciency of this approach. In the following, we
+describe LCMmax.
+ALGORITHM LCMmax (P:itemset, H:items to
+be added)
+1. H′ := the set of items e in H s.t. P ∪{e} is frequent
+2. If H′ = ∅then
+3.
+If P ∪{e} is infrequent for any e then
+output P ; return
+4.
+End if
+5. End if
+6. Choose an item e∗∈H′ ; H′ := H′ \ {e∗}
+7. LCMmax (P ∪{e}, H′)
+8. P ′ := frequent itemset of the maximum size
+found in the recursive call in 7
+9. For each item e ∈H \ P ′ do
+10.
+H′ := H′ \ {e}
+11.
+LCMmax (P ∪{e}, H′)
+12. End for
+3.8
+Checking Maximality
+When LCMmax ﬁnds a frequent itemset P, it checks
+the current solution is maximal or not.
+We call
+this operation maximality check. Maximality check
+is a heavy task, thus many existing algorithms avoid
+it. They store in memory maximal itemsets among
+previously obtained frequent itemsets, and update
+them when they ﬁnd a new itemset. When the al-
+gorithms terminate and obtain all frequent itemsets,
+only maximal frequent itemsets remain in memory.
+We call this storage method. If the number of max-
+imal frequent itemsets is small, storage method is
+eﬃcient.
+However, if the number is large, storage
+method needs much memory. When a frequent item-
+set is newly found, storage method checks whether
+the itemset is included in some itemsets in the mem-
+ory or not. If the number of frequent itemsets is large,
+the operation takes long time.
+To avoid the disadvantage of storage method,
+LCMmax operates maximality check.
+LCMmax
+checks the maximality by ﬁnding an item e such
+that P ∪{e} is frequent. If and only if such e ex-
+ists, P is not maximal. To operate this eﬃciently,
+we reduce the database.
+Let us consider an itera-
+tion of LCMmax with respect to a frequent itemset
+P. LCM algorithms reduce the database by anytime
+database reduction for the frequency counting. Sup-
+pose that the reduced database is composed of trans-
+actions S1, ..., Sh, and each Sl is obtained by merg-
+ing transactions T l
+1, ..., T l
+k of the original database.
+Let H be the set of items to be added in the iter-
+ation. Suppose that we remove all items e from H
+such that P ∪{e} is infrequent.
+Then, for any l,
+T l
+1 ∩H = T l
+2 ∩H =, ..., = T l
+k ∩H holds. For an item e
+and a transaction Sl, we deﬁne the weight w(e, Sl) by
+the number of transactions in T l
+1, ..., T l
+k including e.
+Here the frequency of P∪{e} is P
+S∈{S1,...,Sh} w(e, S).
+Thus, by using the weights, we can eﬃciently check
+the maximality, in linear time of the size of the re-
+duced database.
+When
+we
+merge
+transactions
+to
+reduce
+the
+database, the weights can be updated easily. For each
+item e, we take the sum of w(e, S) over all transac-
+tions S to be merged. In the same way as frequency
+counting, we can remove infrequent items from the
+database for maximality checking, for more reduc-
+tion.
+The computation time for maximality check in
+LCMmax depends on the size of database, but not
+on the number of previously obtained itemsets. Thus,
+storage method has advantages if the number of max-
+imal frequent itemsets is small, but for the instances
+with a lot of maximal frequent itemsets, which take
+long time to be solved, LCMmax has an advantage.
+7
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-all
+afopt_all
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-all
+afopt_all
+fpg_all
+ 0.1
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-all
+afopt_all
+fpg_all
+lcm_all
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-all
+afopt_all
+fpg_all
+lcm_all
+mafia_all
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-all
+afopt_all
+fpg_all
+lcm_all
+mafia_all
+dci_all
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-all
+afopt_all
+fpg_all
+lcm_all
+mafia_all
+dci_all
+patriciamine_all
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-all
+afopt_all
+fpg_all
+lcm_all
+mafia_all
+dci_all
+patriciamine_all
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-closed
+afopt_closed
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-closed
+afopt_closed
+fpg_closed
+ 0.1
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-closed
+afopt_closed
+fpg_closed
+lcm_closed
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-closed
+afopt_closed
+fpg_closed
+lcm_closed
+mafia_closed
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-closed
+afopt_closed
+fpg_closed
+lcm_closed
+mafia_closed
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-maximal
+afopt_maximal
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-maximal
+afopt_maximal
+fpg_maximal
+ 0.1
+ 1
+ 10
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-maximal
+afopt_maximal
+fpg_maximal
+lcm_maximal
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-maximal
+afopt_maximal
+fpg_maximal
+lcm_maximal
+mafia_maximal
+ 0.1
+ 1
+ 10
+ 100
+ 1000
+ 0.01
+ 0.02
+ 0.03
+ 0.04
+ 0.05
+ 0.06
+ 0.07
+ 0.08
+ 0.09
+ 0.1
+ 0.11
+cputime (sec)
+minsup (%)
+BMS-WebView-2-maximal
+afopt_maximal
+fpg_maximal
+lcm_maximal
+mafia_maximal
+Figure 1: Results 1
+4
+Computational Experiments
+In this section, we show the results of our compu-
+tational experiments. We implemented our three al-
+gorithms LCM, LCMfreq, and LCMmax. They are
+coded by ANSI C, and complied by gcc. The exper-
+iments were executed on a notebook PC, with AMD
+athron XP 1600+ of 224MB memory. The perfor-
+mance of LCM algorithms are compared with the
+algorithms which marked good score on FIMI 03:
+fpgrowth[8], afopt[11], MAFIA[5, 6], kDCI[12], and
+PATRICIAMINE[16]. We note that kDCI and PA-
+TRICIAMINE are only for all frequent itemset min-
+ing.
+To reduce the time for experiments, we stop
+the execution when an algorithm takes more than
+10 minute. The following ﬁgures show the results.
+We do not plot if the computation time is over 10
+minutes, or abnormal terminations. The results are
+displayed in Figure 1 and 2. In each graph, the hori-
+zontal axis is the size of minimum supports, and the
+virtical axis is the CPU time written in a log scale.
+From the performances of implementations, the in-
+stances were classiﬁed into three groups, in which the
+results are similar. Due to the space limitation, we
+show one instance as a representative for each group.
+The ﬁrst group is composed of BMS-WebView1,
+BMS-WebView2, BMS-POS, T10I4D100K, kosarak,
+and retail.
+These datasets have many items and
+transactions but are sparse. We call these datasets
+sparse datasets. We chosen BMS-WebView2 as the
+representative.
+The second group is composed of datasets taken
+8
