@@ -38,7 +38,7 @@ Hai phiên bản:
 
 ## Setup
 
-Yêu cầu: Julia >= 1.9, Python >= 3.9, Java >= 8.
+Xem [SETUP.md](SETUP.md) để cài Julia, SPMF, và tải datasets.
 
 ```bash
 julia --project=. scripts/setup.jl
