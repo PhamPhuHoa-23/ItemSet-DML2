@@ -110,7 +110,7 @@ Speedup của `lcmfreq.jl` so với SPMF Java:
 | T10I4D100K | 8x | 9x |
 | T40I10D100K | 32x | 32x |
 
-Báo cáo đầy đủ: [docs/Report.pdf](docs/Report.pdf)
+Báo cáo: [docs/Report.pdf](docs/Report.pdf)
 
 ## Tài liệu tham khảo
 
