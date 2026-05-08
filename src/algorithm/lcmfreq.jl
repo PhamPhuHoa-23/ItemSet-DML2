@@ -1,29 +1,6 @@
-﻿"""
-LCMFreq Optimized Implementation (BitArray tidsets)
-=====================================================
-Same algorithm as lcmfreq_base.jl but with the key optimization:
-
-  BASELINE : tidset per item is Vector{Int} (sorted transaction indices)
-             support = length(intersect)
-             intersection = merge of two sorted lists -> O(|A| + |B|)
-
-  OPTIMIZED: tidset per item is BitArray{1} (bitmask over N transactions)
-             support = count(bits)          -> POPCNT hardware instruction
-             T(PU{e}) = tidset_P .& ts[e]  -> bitwise AND, SIMD-accelerated
-
-Why BitArray is faster:
-  - 8x less memory per tidset -> better cache utilization
-  - Bitwise AND uses SIMD (processes 64 transactions per CPU clock)
-  - popcount() maps to POPCNT hardware instruction on x86-64
-  - No pointer chasing (contiguous bit-packed memory)
-
-Design: tidsets_full is read-only (never mutated). Each recursive frame
-computes T(PU{e}) = tidset_P .& tidsets_full[e] on the fly. This avoids
-shared-mutable-state bugs across DFS branches.
-
-Paper: Uno, Kiyomi, Arimura (2004) "LCM ver.2", FIMI workshop.
-Reference Java: SPMF AlgoLCMFreq.java (Alan Souza / Philippe Fournier-Viger)
-"""
+# LCMFreq optimised — BitArray tidsets (Uno et al., FIMI 2004)
+# Tidset per item stored as BitArray{1}; intersection via SIMD AND, support via POPCNT.
+# Dict-based allocation avoids OOM on sparse datasets with large item IDs.
 
 include("../io/reader.jl")
 
@@ -41,7 +18,6 @@ function lcmfreq(transactions::Vector{Vector{Int}}, minsup_abs::Int)::LCMFreqRes
     n = length(transactions)
     isempty(transactions) && return LCMFreqResult(result)
 
-    # --- Step 1: Count support of every item (one pass) ---
     item_counts = Dict{Int, Int}()
     for tx in transactions
         for item in tx
@@ -49,13 +25,9 @@ function lcmfreq(transactions::Vector{Vector{Int}}, minsup_abs::Int)::LCMFreqRes
         end
     end
 
-    # --- Step 2: Collect frequent items (sorted ascending) ---
     all_freq_items = sort([item for (item, cnt) in item_counts if cnt >= minsup_abs])
     freq_set = Set(all_freq_items)
 
-    # --- Step 3: Build BitArray tidsets ONLY for frequent items ---
-    # Using Dict avoids allocating O(max_item_id) BitArrays for sparse datasets
-    # where max_item_id >> number_of_frequent_items.
     tidsets_full = Dict{Int, BitArray{1}}()
     for item in all_freq_items
         tidsets_full[item] = falses(n)
@@ -68,14 +40,10 @@ function lcmfreq(transactions::Vector{Vector{Int}}, minsup_abs::Int)::LCMFreqRes
         end
     end
 
-    # --- Step 4: Remove infrequent items from each transaction ---
     clean_transactions = [filter(x -> x in freq_set, tx) for tx in transactions]
 
-    # --- Step 5: DFS from empty prefix ---
-    tidset_empty = trues(n)
     p_buf = zeros(Int, 500)
-
-    _backtrack_bit!(p_buf, 0, tidset_empty, all_freq_items,
+    _backtrack_bit!(p_buf, 0, trues(n), all_freq_items,
                     clean_transactions, tidsets_full, minsup_abs, result, n)
 
     return LCMFreqResult(result)
@@ -136,11 +104,7 @@ function main()
     t0 = time_ns()
     result = lcmfreq(transactions, minsup_abs)
     elapsed_ms = (time_ns() - t0) / 1e6
-    if output_path == "-"
-        print_output(result)
-    else
-        write_output(result, output_path)
-    end
+    output_path == "-" ? print_output(result) : write_output(result, output_path)
     println(stderr, "LCMFreq-Opt: $(length(result.itemsets)) itemsets | minsup=$(minsup_abs)/$(n) | $(round(elapsed_ms, digits=1)) ms")
 end
 
