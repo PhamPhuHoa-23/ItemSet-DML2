@@ -1,4 +1,4 @@
-# LCMFreq baseline — Vector{Int} tidsets (Uno et al., FIMI 2004)
+# LCMFreq baseline — Vector{Int} tidsets + Hypercube Decomposition (Uno et al., FIMI 2004)
 # Uses OccurrenceDeliver (bucket-based single pass) to propagate tidsets.
 # See lcmfreq.jl for the BitArray-optimised version.
 
@@ -34,18 +34,29 @@ function lcmfreq_base(transactions::Vector{Vector{Int}}, minsup_abs::Int)::LCMFr
                            if length(buckets[item]) >= minsup_abs])
 
     p_items = zeros(Int, 500)
-    _backtrack!(p_items, 0,
-                collect(1:length(clean_transactions)),
-                all_freq_items, clean_transactions, minsup_abs, result)
+    _hypercube_base!(p_items, 0,
+                     collect(1:length(clean_transactions)),
+                     all_freq_items, clean_transactions, minsup_abs, result, Int[])
 
     return LCMFreqResult(result)
 end
 
-function _backtrack!(
+function _all_subsets_base(items::Vector{Int})::Vector{Vector{Int}}
+    n = length(items)
+    out = Vector{Vector{Int}}(undef, 2^n)
+    for mask in 0:(2^n - 1)
+        out[mask + 1] = [items[i] for i in 1:n if (mask >> (i-1)) & 1 == 1]
+    end
+    return out
+end
+
+function _hypercube_base!(
     p::Vector{Int}, plen::Int, tids_P::Vector{Int},
     freq_items::Vector{Int}, transactions::Vector{Vector{Int}},
-    minsup::Int, result::Vector{FreqItemset}
+    minsup::Int, result::Vector{FreqItemset}, S::Vector{Int}
 )
+    support_P = length(tids_P)
+
     # OccurrenceDeliver: one pass over tids_P fills all candidate buckets at once
     local_buckets = Dict{Int, Vector{Int}}(item => Int[] for item in freq_items)
     for tid in tids_P
@@ -54,17 +65,33 @@ function _backtrack!(
         end
     end
 
+    # H(P) = items whose tidset equals T(P) (adding them doesn't reduce support)
+    H_P = filter(e -> length(local_buckets[e]) == support_P, freq_items)
+
+    # S' = S ∪ H(P)
+    S_prime     = sort!(collect(union(S, H_P)))
+    S_prime_set = Set(S_prime)
+
+    # Batch output: P ∪ Q for all Q ⊆ S'
+    for Q in _all_subsets_base(S_prime)
+        (plen == 0 && isempty(Q)) && continue
+        push!(result, FreqItemset(sort!([p[1:plen]; Q]), support_P))
+    end
+
+    # Recurse only for items outside S'
+    tail_P = plen > 0 ? p[plen] : 0
+
     for (j, e) in enumerate(freq_items)
-        tids_Pe = local_buckets[e]
+        e <= tail_P      && continue
+        e in S_prime_set && continue
+
+        tids_Pe    = local_buckets[e]
         support_Pe = length(tids_Pe)
         support_Pe < minsup && continue
 
         @inbounds p[plen + 1] = e
-        push!(result, FreqItemset(sort(p[1:(plen + 1)]), support_Pe))
 
         items_after_e = freq_items[(j + 1):end]
-        isempty(items_after_e) && continue
-
         counts = Dict{Int, Int}(item => 0 for item in items_after_e)
         for tid in tids_Pe
             for item in transactions[tid]
@@ -72,9 +99,9 @@ function _backtrack!(
             end
         end
         new_freq_items = filter(item -> counts[item] >= minsup, items_after_e)
-        isempty(new_freq_items) && continue
 
-        _backtrack!(p, plen + 1, tids_Pe, new_freq_items, transactions, minsup, result)
+        _hypercube_base!(p, plen + 1, tids_Pe, new_freq_items,
+                         transactions, minsup, result, S_prime)
     end
 end
 

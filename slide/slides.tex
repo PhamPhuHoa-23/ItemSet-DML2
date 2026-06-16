@@ -1,0 +1,647 @@
+% ===================================================================
+% slides.tex — LCMFreq presentation
+% pdflatex + Vietnamese (T5 + babel), 8pt, 16:9
+% ===================================================================
+\documentclass[8pt, aspectratio=169]{beamer}
+
+% ---- Encoding & Language ------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+
+% ---- Color palette (from psdear.sty) ------------------------------
+\usepackage{xcolor}
+\definecolor{psdearblue}{HTML}{1f4e79}
+\definecolor{psdearteal}{HTML}{2a9d8f}
+\definecolor{psdearorange}{HTML}{e76f51}
+\definecolor{psdeargray}{HTML}{6c757d}
+\definecolor{psdearbg}{HTML}{f4f7f9}
+\definecolor{psdearnavy}{HTML}{16324f}
+\definecolor{psdearsky}{HTML}{d9eef7}
+\definecolor{psdeargold}{HTML}{f4a261}
+\definecolor{psdeargreen}{HTML}{5c9f72}
+\definecolor{psdearink}{HTML}{243746}
+
+% ---- Beamer configuration -----------------------------------------
+\usetheme{default}
+\usecolortheme{default}
+
+\setbeamercolor{normal text}{fg=psdearink}
+\setbeamercolor{frametitle}{bg=psdearblue, fg=white}
+\setbeamercolor{structure}{fg=psdearblue}
+\setbeamercolor{block title}{bg=psdearblue!90, fg=white}
+\setbeamercolor{block body}{bg=psdearbg}
+\setbeamercolor{block title alerted}{bg=psdearorange, fg=white}
+\setbeamercolor{block body alerted}{bg=psdearorange!12}
+\setbeamercolor{block title example}{bg=psdearteal, fg=white}
+\setbeamercolor{block body example}{bg=psdearteal!10}
+\setbeamerfont{frametitle}{size=\normalsize, series=\bfseries}
+\setbeamerfont{block title}{size=\small, series=\bfseries}
+\setbeamerfont{block body}{size=\footnotesize}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \hfill
+  \textcolor{psdeargray}{\fontsize{6}{7}\selectfont\insertframenumber/\inserttotalframenumber}%
+  \hspace{4pt}\vspace{3pt}%
+}
+\setbeamertemplate{itemize item}{\small\color{psdearteal}$\bullet$}
+\setbeamertemplate{itemize subitem}{\scriptsize\color{psdearorange}--}
+\setbeamertemplate{enumerate item}{\small\color{psdearblue}\textbf{\insertenumlabel.}}
+
+% ---- Packages -----------------------------------------------------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, fit, calc, backgrounds}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{graphicx}
+
+% ---- Reusable tcolorbox styles ------------------------------------
+\tcbset{
+  stepstyle/.style={
+    enhanced, boxrule=0.5pt, arc=2pt,
+    left=3pt, right=3pt, top=1pt, bottom=1pt,
+    fonttitle=\fontsize{5.5}{6.5}\selectfont\bfseries,
+    coltitle=white,
+    toptitle=0.5pt, bottomtitle=0.5pt,
+    before upper={\fontsize{6}{7.5}\selectfont}
+  }
+}
+
+\newtcolorbox{sblue}[1]{stepstyle, colframe=psdearblue,  colback=psdearblue!10,  colbacktitle=psdearblue,  title={#1}}
+\newtcolorbox{steal}[1]{stepstyle, colframe=psdearteal,  colback=psdearteal!10,  colbacktitle=psdearteal,  title={#1}}
+\newtcolorbox{sorange}[1]{stepstyle, colframe=psdearorange, colback=psdearorange!10, colbacktitle=psdearorange, title={#1}}
+\newtcolorbox{sgreen}[1]{stepstyle, colframe=psdeargreen, colback=psdeargreen!10, colbacktitle=psdeargreen, title={#1}}
+\newtcolorbox{snavy}[1]{stepstyle, colframe=psdearnavy,  colback=psdearnavy!10,  colbacktitle=psdearnavy,  title={#1}}
+
+% Code box: colored left bar, bg tint
+\newtcolorbox{codebox}[1]{
+  enhanced, boxrule=0pt, frame hidden,
+  borderline west={2pt}{0pt}{#1},
+  colback=#1!8,
+  left=4pt, right=3pt, top=1pt, bottom=1pt,
+  before upper={\fontsize{5}{6.5}\selectfont\ttfamily},
+  nobeforeafter
+}
+
+% ---- TikZ styles for the recursion tree ---------------------------
+\tikzset{
+  tnode/.style={
+    draw=psdearblue, fill=psdearsky!50,
+    rounded corners=2pt,
+    font=\fontsize{5}{6.5}\selectfont,
+    inner sep=3pt, align=center,
+    minimum width=2.1cm, minimum height=0.85cm
+  },
+  farrow/.style={
+    -{Latex[length=1.8mm, width=1.2mm]},
+    draw=psdearink!70, line width=0.55pt
+  },
+  elabel/.style={
+    font=\fontsize{4.5}{5.5}\selectfont,
+    text=psdeargray, midway
+  }
+}
+
+% ---- Title info ---------------------------------------------------
+\title{\textbf{LCMFreq: Khai thác Tập Phổ Biến}}
+\subtitle{Uno, Kiyomi \& Arimura -- FIMI 2004}
+\author{Nhóm 07 · CSC14004 -- Khai Thác Dữ Liệu và Ứng Dụng}
+\date{}
+
+% ===================================================================
+\begin{document}
+
+% -------------------------------------------------------------------
+% FRAME 1: Title
+% -------------------------------------------------------------------
+\begin{frame}[plain]
+  \begin{tikzpicture}[remember picture, overlay]
+    \fill[psdearblue]  (current page.north west) rectangle (current page.south east);
+    \fill[psdearteal!80] ([yshift=-0.8cm]current page.north west)
+                          rectangle ([yshift=-1.1cm]current page.north east);
+    \fill[psdearnavy] (current page.south west)
+                       rectangle ([yshift=0.6cm]current page.south east);
+  \end{tikzpicture}
+  \vspace{0.9cm}
+  \begin{center}
+    {\color{white}\Large\bfseries LCMFreq: Khai thác Tập Phổ Biến}\\[0.5em]
+    {\color{psdearsky}\normalsize Uno, Kiyomi \& Arimura -- FIMI 2004}\\[1.2em]
+    {\color{white!85!psdearblue}\small Nhóm 07}\\[0.2em]
+    {\color{psdearsky!70}\footnotesize CSC14004 -- Khai Thác Dữ Liệu và Ứng Dụng\\
+    HCMUS · 2025--2026}
+  \end{center}
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 2: Bài toán FIM
+% -------------------------------------------------------------------
+\begin{frame}{Bài toán Frequent Itemset Mining (FIM)}
+  \begin{columns}[T]
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Định nghĩa cơ bản}
+        \begin{itemize}\setlength\itemsep{2pt}
+          \item $\mathcal{I}$: tập items; $\mathcal{D}$: transaction database
+          \item \textbf{Support}: $\mathrm{sup}(X)=|\{T\in\mathcal{D}:X\subseteq T\}|$
+          \item $X$ \textbf{frequent} nếu $\mathrm{sup}(X) \geq \sigma$
+          \item \textbf{TID-set}: $\mathcal{T}(X)=\{k:X\subseteq T_k\}$
+          \item Tính chất: $\mathcal{T}(P\cup\{e\})=\mathcal{T}(P)\cap\mathcal{T}(\{e\})$
+        \end{itemize}
+      \end{block}
+      \vspace{4pt}
+      \begin{block}{Dòng thời gian thuật toán FIM}
+        \footnotesize
+        \begin{tabular}{@{}lll@{}}
+          \toprule
+          Năm & Thuật toán & Ý tưởng chính \\
+          \midrule
+          1994 & Apriori & Level-wise candidate gen \\
+          1997 & ECLAT   & Vertical tidset format \\
+          2000 & FP-Growth & FP-tree, không sinh candidate \\
+          \textbf{2004} & \textcolor{psdearteal}{\bfseries LCMFreq} & Backtrack + OccDeliver + Hypercube \\
+          \bottomrule
+        \end{tabular}
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.50\textwidth}
+      \begin{alertblock}{Hạn chế của các thuật toán trước}
+        \begin{itemize}\setlength\itemsep{2pt}
+          \item \textbf{Apriori}: quét DB đa lượt, sinh nhiều candidate tường minh
+          \item \textbf{ECLAT}: bộ nhớ lớn với dense dataset
+          \item \textbf{FP-Growth}: FP-tree tốn bộ nhớ, khó cập nhật động
+        \end{itemize}
+      \end{alertblock}
+      \vspace{4pt}
+      \begin{exampleblock}{LCMFreq giải quyết bằng 3 kỹ thuật}
+        \begin{enumerate}\setlength\itemsep{2pt}
+          \item \textbf{BackTracking} -- DFS trên prefix tree, ít bộ nhớ
+          \item \textbf{OccurrenceDeliver} -- đếm support một lần duyệt
+          \item \textbf{HypercubeDecomposition} -- batch output không cần đếm lại
+        \end{enumerate}
+      \end{exampleblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 3: Ba kỹ thuật
+% -------------------------------------------------------------------
+\begin{frame}{Ba kỹ thuật cốt lõi của LCMFreq}
+  \begin{columns}[T]
+    \begin{column}{0.31\textwidth}
+      \begin{block}{1. BackTracking (DFS)}
+        \begin{itemize}\setlength\itemsep{2pt}
+          \item Xuất phát từ $P=\emptyset$, mở rộng DFS
+          \item Chỉ thêm item $e > \mathrm{tail}(P)$
+          \item Đảm bảo mỗi itemset xuất hiện đúng 1 lần
+          \item Stack chỉ giữ đường đi hiện tại\\
+            $\Rightarrow$ bộ nhớ $O(\|\mathcal{D}\|\cdot\mathrm{depth})$
+        \end{itemize}
+        \vspace{4pt}
+        \begin{tcolorbox}[enhanced, colback=psdearblue!8, colframe=psdearblue,
+          boxrule=0.4pt, arc=2pt, left=3pt, right=3pt, top=2pt, bottom=2pt]
+          \fontsize{5.5}{7}\selectfont\ttfamily
+          BackTracking(P):\\
+          \quad output P\\
+          \quad for e > tail(P):\\
+          \quad\quad if freq(P$\cup$\{e\}):\\
+          \quad\quad\quad BackTracking(P$\cup$\{e\})
+        \end{tcolorbox}
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.31\textwidth}
+      \begin{block}{2. OccurrenceDeliver}
+        \begin{itemize}\setlength\itemsep{2pt}
+          \item Một lần duyệt qua $\mathcal{T}(P)$
+          \item Mỗi $t\in\mathcal{T}(P)$: phân phối vào bucket của từng item $e\in t$
+          \item $\mathrm{Bucket}[e] = \mathcal{T}(P\cup\{e\})$ cho mọi $e$ cùng lúc
+          \item Chi phí: $O\!\left(\sum_{t\in\mathcal{T}(P)}|t|\right)$
+        \end{itemize}
+        \vspace{4pt}
+        \begin{tcolorbox}[enhanced, colback=psdearteal!8, colframe=psdearteal,
+          boxrule=0.4pt, arc=2pt, left=3pt, right=3pt, top=2pt, bottom=2pt]
+          \fontsize{5.5}{7}\selectfont\ttfamily
+          for tid in T(P):\\
+          \quad for e in transactions[tid]:\\
+          \quad\quad Bucket[e].push(tid)
+        \end{tcolorbox}
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.31\textwidth}
+      \begin{block}{3. HypercubeDecomposition}
+        \begin{itemize}\setlength\itemsep{2pt}
+          \item $H(P)=\{e:|{\rm Bucket}[e]|=|{\mathcal T}(P)|\}$
+          \item $\forall Q\subseteq H(P):\mathcal{T}(P\cup Q)=\mathcal{T}(P)$
+          \item $S'=S\cup H(P)$; output $2^{|S'|}$ itemsets cùng support
+          \item Không đệ quy cho item trong $H(P)$
+        \end{itemize}
+        \vspace{4pt}
+        \begin{tcolorbox}[enhanced, colback=psdearorange!8, colframe=psdearorange,
+          boxrule=0.4pt, arc=2pt, left=3pt, right=3pt, top=2pt, bottom=2pt]
+          \fontsize{5.5}{7}\selectfont\ttfamily
+          S' = S $\cup$ H(P)\\
+          for Q $\subseteq$ S':\\
+          \quad output P $\cup$ Q : sup(P)\\
+          for e $\notin$ S', e > tail(P):\\
+          \quad if freq: recurse(P$\cup$\{e\}, S')
+        \end{tcolorbox}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 4: Database ví dụ + Bước 0
+% -------------------------------------------------------------------
+\begin{frame}{Ví dụ minh họa: Database và OccurrenceDeliver tại gốc}
+  \begin{columns}[T]
+    \begin{column}{0.27\textwidth}
+      \begin{block}{Database ($\sigma=2$)}
+        \footnotesize\centering
+        \begin{tabular}{cl}
+          \toprule
+          TID & Items \\
+          \midrule
+          $T_1$ & $A,B,C,D$ \\
+          $T_2$ & $A,B,D$ \\
+          $T_3$ & $A,B,C$ \\
+          $T_4$ & $B,C$ \\
+          $T_5$ & $A,B,C,D$ \\
+          \bottomrule
+        \end{tabular}\\[3pt]
+        $\mathcal{I}=\{A,B,C,D\}$\\
+        $n=5$, $\sigma=2$
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.38\textwidth}
+      \begin{block}{OccurrenceDeliver tại $P=\emptyset$}
+        \footnotesize
+        $\mathcal{T}(\emptyset)=\{T_1,T_2,T_3,T_4,T_5\}$, sup=5\\[4pt]
+        \centering
+        \begin{tabular}{cll}
+          \toprule
+          Bucket & TIDs & sup \\
+          \midrule
+          $[A]$ & $T_1,T_2,T_3,T_5$ & 4 \\
+          $[B]$ & $T_1,T_2,T_3,T_4,T_5$ & \textcolor{psdearorange}{\bfseries 5} \\
+          $[C]$ & $T_1,T_3,T_4,T_5$ & 4 \\
+          $[D]$ & $T_1,T_2,T_5$ & 3 \\
+          \bottomrule
+        \end{tabular}
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.30\textwidth}
+      \begin{exampleblock}{HypercubeDecomposition}
+        \footnotesize
+        $|\text{Bucket}[B]| = 5 = |\mathcal{T}(\emptyset)|$\\[3pt]
+        $\Rightarrow B \in H(\emptyset)$\\[4pt]
+        $S' = \emptyset \cup \{B\} = \{B\}$\\[4pt]
+        \textbf{Batch output:}\\
+        $Q=\emptyset$: $\{B\}:5$\\[5pt]
+        \textbf{Đệ quy với} $e\in\{A,C,D\}$\\
+        (bỏ $B\in S'$; truyền $S=\{B\}$)
+      \end{exampleblock}
+    \end{column}
+  \end{columns}
+
+  \vspace{3pt}
+  \begin{tcolorbox}[enhanced, colback=psdeargold!15, colframe=psdeargold,
+    boxrule=0.5pt, arc=2pt, left=5pt, right=5pt, top=2pt, bottom=2pt]
+    \fontsize{6.5}{8}\selectfont
+    \textbf{Quan sát:} $B$ xuất hiện trong \emph{tất cả} 5 transaction $\Rightarrow$
+    $B\in H(P)$ tại \emph{mọi} node trong cây DFS.
+    LCMFreq sẽ không bao giờ tạo nhánh đệ quy riêng cho $B$ --
+    thay vào đó $B$ được ghép tự động vào output qua Hypercube.
+  \end{tcolorbox}
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 5: Cây đệ quy TikZ
+% -------------------------------------------------------------------
+\begin{frame}{Cây đệ quy LCMFreq -- Ví dụ 1 ($\sigma=2$)}
+
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    % Tree nodes: top half = context, bottom half = green output
+    tnode/.style={draw=psdearblue, fill=psdearsky!50, rounded corners=2.5pt,
+      font=\fontsize{8}{10}\selectfont, inner sep=4pt, align=center,
+      minimum width=3.0cm},
+    farrow/.style={-{Latex[length=2.2mm]}, draw=psdearink!70, line width=0.6pt},
+    elabel/.style={font=\fontsize{7}{9}\selectfont, text=psdeargray,
+      fill=white, inner sep=0.5pt}
+  ]
+
+  % ---- Level 0: Root  (y=0) ----
+  \node[tnode] (root) at (0, 0) {
+    $P=\emptyset$,\enspace sup$=5$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\checkmark$\ $\{B\}:5$}
+  };
+
+  % ---- Level 1  (y = -1.8) ----
+  \node[tnode] (A) at (-4.0, -1.8) {
+    $P=\{A\}$,\enspace sup$=4$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\{A\}:4$,\ $\{A,B\}:4$}
+  };
+  \node[tnode] (C) at (0, -1.8) {
+    $P=\{C\}$,\enspace sup$=4$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\{C\}:4$,\ $\{B,C\}:4$}
+  };
+  \node[tnode] (D) at (4.0, -1.8) {
+    $P=\{D\}$,\enspace sup$=3$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\{D\}:3$,\ $\{B,D\}:3$}
+  };
+
+  % ---- Level 2  (y = -3.6) ----
+  \node[tnode] (AC) at (-5.5, -3.6) {
+    $P=\{A,C\}$,\enspace sup$=3$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\{A,C\}:3$,\ $\{A,B,C\}:3$}
+  };
+  \node[tnode] (AD) at (-2.3, -3.6) {
+    $P=\{A,D\}$,\enspace sup$=3$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\{A,D\}:3$,\ $\{A,B,D\}:3$}
+  };
+  \node[tnode] (CD) at (0.8, -3.6) {
+    $P=\{C,D\}$,\enspace sup$=2$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\{C,D\}:2$,\ $\{B,C,D\}:2$}
+  };
+
+  % ---- Level 3  (y = -5.4) ----
+  \node[tnode] (ACD) at (-5.5, -5.4) {
+    $P=\{A,C,D\}$,\enspace sup$=2$,\enspace $S'=\{B\}$\\[1pt]
+    {\color{psdeargreen}\footnotesize$\{A,C,D\}:2$,\ $\{A,B,C,D\}:2$}
+  };
+
+  % ---- Edges ----
+  \draw[farrow] (root.south) -- node[elabel, left]{$e\!=\!A$} (A.north);
+  \draw[farrow] (root.south) -- node[elabel, right, pos=0.55]{$e\!=\!C$} (C.north);
+  \draw[farrow] (root.south) -- node[elabel, right]{$e\!=\!D$} (D.north);
+
+  \draw[farrow] (A.south) -- node[elabel, left]{$e\!=\!C$} (AC.north);
+  \draw[farrow] (A.south) -- node[elabel, right]{$e\!=\!D$} (AD.north);
+
+  \draw[farrow] (C.south) -- node[elabel, right]{$e\!=\!D$} (CD.north);
+
+  \draw[farrow] (AC.south) -- node[elabel, left]{$e\!=\!D$} (ACD.north);
+
+\end{tikzpicture}%
+}
+
+\vspace{2pt}
+{\fontsize{6}{7.5}\selectfont\color{psdeargray}
+7 node DFS (thay vì 15 nếu dùng ECLAT). $B$ không bao giờ xuất hiện
+như nhánh đệ quy -- nó được batch-output qua Hypercube tại mọi node.}
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 6: Split-view — Chạy tay vs Code Julia
+% -------------------------------------------------------------------
+\begin{frame}{Mapping: Chạy tay $\leftrightarrow$ Code Julia}
+
+  \begin{columns}[T, onlytextwidth]
+    % ---- LEFT: hand-traced steps ----
+    \begin{column}{0.43\textwidth}
+      \textbf{\footnotesize Chạy tay: Node $P=\{A\}$, $S=\{B\}$}
+
+      \begin{sblue}{Bước 1 — Tính support}
+        $\mathcal{T}(\{A\})=\{T_1,T_2,T_3,T_5\}$,\ sup$=4$
+      \end{sblue}
+      \begin{steal}{Bước 2 — OccurrenceDeliver}
+        Duyệt $\{T_1,\!T_2,\!T_3,\!T_5\}$, điền bucket:\\
+        $[B]=\{T_1,T_2,T_3,T_5\}$:4\enspace
+        $[C]=\{T_1,T_3,T_5\}$:3\enspace
+        $[D]=\{T_1,T_2,T_5\}$:3
+      \end{steal}
+      \begin{sorange}{Bước 3 — Hypercube}
+        $|[B]|=4=\text{sup}\Rightarrow B\in H(\{A\})$;\enspace
+        $S'=\{B\}$
+      \end{sorange}
+      \begin{sgreen}{Bước 4 — Batch output}
+        $Q=\emptyset$: $\{A\}:4$;\enspace $Q=\{B\}$: $\{A,B\}:4$
+      \end{sgreen}
+      \begin{snavy}{Bước 5 — Đệ quy}
+        $e\!=\!C$: sup$=3\!\geq\!2\Rightarrow$ recurse$(P\!\cup\!\{C\},\{B\})$\\
+        $e\!=\!D$: sup$=3\!\geq\!2\Rightarrow$ recurse$(P\!\cup\!\{D\},\{B\})$
+      \end{snavy}
+    \end{column}
+
+    % ---- RIGHT: Julia code, color-coded ----
+    \begin{column}{0.54\textwidth}
+      \textbf{\footnotesize Code: \texttt{\_hypercube\_base!}}
+      \begin{codebox}{psdearblue}
+support\_P = length(tids\_P) \hfill\textcolor{psdearblue}{\# 1}
+      \end{codebox}
+      \begin{codebox}{psdearteal}
+local\_buckets = Dict(item => Int[] ...) \hfill\textcolor{psdearteal}{\# 2}\\
+for tid in tids\_P\\
+\quad for item in transactions[tid]\\
+\quad\quad haskey(local\_buckets, item) \&\&\\
+\quad\quad\quad push!(local\_buckets[item], tid)\\
+end\enspace end
+      \end{codebox}
+      \begin{codebox}{psdearorange}
+H\_P = filter(freq\_items) do e \hfill\textcolor{psdearorange}{\# 3}\\
+\quad length(local\_buckets[e]) == support\_P\\
+end\\
+S\_prime = sort!(collect(union(S, H\_P)))
+      \end{codebox}
+      \begin{codebox}{psdeargreen}
+for Q in \_all\_subsets\_base(S\_prime) \hfill\textcolor{psdeargreen}{\# 4}\\
+\quad push!(result, FreqItemset(\\
+\quad\quad sort!([p[1:plen]; Q]), support\_P))\\
+end
+      \end{codebox}
+      \begin{codebox}{psdearnavy}
+for (j, e) in enumerate(freq\_items) \hfill\textcolor{psdearnavy}{\# 5}\\
+\quad e <= tail\_P \&\& continue\\
+\quad e in S\_prime\_set \&\& continue\\
+\quad \_hypercube\_base!(p, plen+1,\\
+\quad\quad local\_buckets[e], ..., S\_prime)\\
+end
+      \end{codebox}
+    \end{column}
+  \end{columns}
+
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 7: Tối ưu hóa BitArray (Optimized version)
+% -------------------------------------------------------------------
+\begin{frame}{Tối ưu hóa: BitArray thay TID-list}
+
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.44\textwidth}
+      \begin{block}{Ý tưởng}
+        \begin{itemize}\setlength\itemsep{3pt}
+          \item Thay \texttt{Vector\{Int\}} (danh sách TID) bằng \texttt{BitArray\{1\}} (bitmap)
+          \item $\mathcal{T}(P\cup\{e\})=\mathcal{T}(P)\ \mathbf{AND}\ \mathcal{T}(\{e\})$\\
+            bằng phép AND theo bit (SIMD, 64 TID/lần)
+          \item $\mathrm{sup}(P)=\texttt{count(tidset\_P)}$\\
+            bằng lệnh POPCNT phần cứng
+        \end{itemize}
+      \end{block}
+      \vspace{4pt}
+      \begin{exampleblock}{So sánh baseline vs optimized}
+        \footnotesize\centering
+        \begin{tabular}{@{}lll@{}}
+          \toprule
+          Phép toán & Baseline & Optimized \\
+          \midrule
+          Giao tidset & OccDeliver loop & \texttt{.{\&}} SIMD AND \\
+          Đếm support & \texttt{length(v)} & \texttt{count(bits)} POPCNT \\
+          Lưu trữ & Vector\{Int\} & BitArray\{1\} \\
+          Dense data & Nhiều phần tử & Ít bit = compact \\
+          \bottomrule
+        \end{tabular}
+      \end{exampleblock}
+    \end{column}
+
+    \begin{column}{0.52\textwidth}
+      \begin{block}{Code: \texttt{\_hypercube!} (optimized)}
+        \begin{tcolorbox}[enhanced, colback=psdearbg, colframe=psdearblue!40,
+          boxrule=0.4pt, arc=2pt, left=4pt, right=4pt, top=2pt, bottom=2pt]
+          \fontsize{6}{8}\selectfont\ttfamily
+          \textcolor{psdearblue}{\# Giao tidset qua AND bit:}\\
+          tidset\_Pe = tidset\_P .{\&} tidsets\_full[e]\\[3pt]
+          \textcolor{psdearblue}{\# Đếm support qua POPCNT:}\\
+          support\_Pe = count(tidset\_Pe)\\[3pt]
+          \textcolor{psdearblue}{\# H(P) via AND:}\\
+          H\_P = filter(freq\_items) do e\\
+          \quad count(tidset\_P .{\&} tidsets\_full[e])\\
+          \quad\quad == support\_P\\
+          end\\[3pt]
+          \textcolor{psdearblue}{\# Batch output (giống baseline):}\\
+          for Q in \_all\_subsets(S\_prime)\\
+          \quad push!(result, FreqItemset(...))\\
+          end
+        \end{tcolorbox}
+      \end{block}
+      \vspace{3pt}
+      \begin{alertblock}{Kết quả thực nghiệm (tóm tắt)}
+        \footnotesize
+        \begin{itemize}\setlength\itemsep{2pt}
+          \item Match 100\% với SPMF trên 9 tập dữ liệu chuẩn
+          \item Nhanh hơn SPMF Java từ $3.5\times$ đến $141\times$
+          \item Tiết kiệm bộ nhớ tới $27\times$ so với baseline
+        \end{itemize}
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 8: Thực nghiệm và kiểm chứng
+% -------------------------------------------------------------------
+\begin{frame}{Thực nghiệm và kiểm chứng}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Correctness so với SPMF}
+        \footnotesize\centering
+        \begin{tabular}{@{}lrrr@{}}
+          \toprule
+          Dataset & minsup & Julia & SPMF \\
+          \midrule
+          Chess      & 0.75  & 20\,993 & 20\,993 \\
+          Connect    & 0.93  & 7\,203  & 7\,203 \\
+          Mushroom   & 0.30  & 2\,735  & 2\,735 \\
+          Pumsb      & 0.90  & 2\,607  & 2\,607 \\
+          Accidents  & 0.80  & 149     & 149 \\
+          Retail     & 0.02  & 55      & 55 \\
+          T10I4D100K & 0.008 & 494     & 494 \\
+          T40I10D100K& 0.02  & 2\,293  & 2\,293 \\
+          \bottomrule
+        \end{tabular}
+      \end{block}
+
+      \vspace{4pt}
+      \begin{exampleblock}{Ý nghĩa khi báo cáo}
+        \footnotesize
+        \begin{itemize}\setlength\itemsep{2pt}
+          \item Output khớp 100\% về \textbf{số lượng itemset}.
+          \item Unit test kiểm tra cả support từng itemset trên toy dataset.
+          \item SPMF dùng làm \textbf{oracle kiểm chứng}, không sao chép code.
+        \end{itemize}
+      \end{exampleblock}
+    \end{column}
+
+    \begin{column}{0.49\textwidth}
+      \begin{block}{Hiệu năng: Julia Opt vs SPMF}
+        \centering
+        \includegraphics[width=0.96\linewidth]{../data/results/figures/speedup_bar.png}
+      \end{block}
+      \vspace{2pt}
+      \begin{alertblock}{Nhận xét nhanh}
+        \footnotesize
+        Dense dataset như Chess, Mushroom, Pumsb hưởng lợi mạnh từ
+        \texttt{BitArray}: giao tidset bằng AND bit và đếm support bằng POPCNT.
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% -------------------------------------------------------------------
+% FRAME 9: Kết luận
+% -------------------------------------------------------------------
+\begin{frame}{Kết luận}
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \begin{block}{15 frequent itemsets tìm được ($\sigma=2$)}
+        \scriptsize\centering
+        \begin{tabular}{cl}
+          \toprule
+          sup & Frequent itemsets \\
+          \midrule
+          5 & $\{B\}$ \\
+          4 & $\{A\},\{A,B\},\{C\},\{B,C\}$ \\
+          3 & $\{A,C\},\{A,B,C\},\{A,D\},\{A,B,D\},\{D\},\{B,D\}$ \\
+          2 & $\{A,C,D\},\{A,B,C,D\},\{C,D\},\{B,C,D\}$ \\
+          \bottomrule
+        \end{tabular}
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.42\textwidth}
+      \begin{exampleblock}{Điểm nổi bật của LCMFreq}
+        \footnotesize
+        \begin{itemize}\setlength\itemsep{1pt}
+          \item Chỉ \textbf{7 nút DFS} cho ví dụ 15 itemsets\\
+            (ECLAT xét riêng từng itemset)
+          \item $B$ \textbf{không bao giờ đệ quy}:\\
+            $B\in H(P)$ tại mọi node $\Rightarrow$ tiết kiệm toàn bộ nhánh $B$
+          \item OccurrenceDeliver: một lần duyệt\\
+            $\Rightarrow$ tính support tất cả candidate
+          \item Cài đặt Julia + BitArray:\\
+            AND SIMD + POPCNT phần cứng
+        \end{itemize}
+      \end{exampleblock}
+
+      \vspace{2pt}
+      \begin{alertblock}{Nếu thầy hỏi ``paper khác SPMF/code?''}
+        \scriptsize
+        Bản baseline bám sát LCMFreq: Backtracking + OccurrenceDeliver +
+        HypercubeDecomposition. Bản tối ưu giữ khung Hypercube nhưng thay
+        cách đếm support bằng \texttt{BitArray}; đây là tối ưu riêng của nhóm.
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+
+  \vspace{0.2em}
+  \begin{tcolorbox}[enhanced, colback=psdearblue!8, colframe=psdearblue,
+    boxrule=0.5pt, arc=2pt, left=5pt, right=5pt, top=2pt, bottom=2pt]
+    \scriptsize\centering
+    \textbf{Tài liệu tham khảo:}
+    Uno T., Kiyomi M., Arimura H.
+    \textit{``LCM ver.2: Efficient Mining Algorithms for Frequent/Closed/Maximal Itemsets.''}
+    FIMI 2004.
+  \end{tcolorbox}
+\end{frame}
+
+\end{document}
