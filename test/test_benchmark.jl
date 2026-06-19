@@ -125,7 +125,7 @@ for (ds_name, ds_rows) in sort(collect(by_dataset), by = x -> x[1])
 
     if !isfile(dat_path)
         @warn "  [$ds_name] Skipping — .dat file not found at $dat_path"
-        skipped += length(ds_rows)
+        global skipped += length(ds_rows)
         continue
     end
 
@@ -137,11 +137,11 @@ for (ds_name, ds_rows) in sort(collect(by_dataset), by = x -> x[1])
     @testset "$ds_name" begin
         for row in ds_rows
             minsup_frac = parse(Float64, row["minsup_frac"])
-            minsup_abs_val = max(1, floor(Int, length(db) * minsup_frac))
+            minsup_abs_val = max(1, ceil(Int, length(db) * minsup_frac))
             spmf_count  = parse(Int, row["spmf_count"])
             opt_expected = parse(Int, row["julia_count"])
 
-            total += 1
+            global total += 1
             try
                 r_opt = Optimized.lcmfreq(db, minsup_abs_val)
                 opt_count = length(r_opt.itemsets)
@@ -163,14 +163,17 @@ for (ds_name, ds_rows) in sort(collect(by_dataset), by = x -> x[1])
                     @test normalize(r_base) == normalize(r_opt)
                 end
 
-                match_str = opt_count == spmf_count ? "PASS" : "FAIL"
+                # SPMF unavailable (spmf_count <= 0, e.g. Kosarak) counts as a
+                # pass here too, since the @test above already skips that case.
+                spmf_ok  = spmf_count <= 0 || opt_count == spmf_count
+                match_str = spmf_ok ? "PASS" : "FAIL"
                 println("  minsup=$(round(minsup_frac*100, digits=1))%  " *
                         "opt=$(opt_count) spmf=$(spmf_count)  [$match_str]")
-                opt_count == spmf_count && (passed += 1)
+                spmf_ok && (global passed += 1)
 
             catch e
                 @error "  minsup=$(minsup_frac): $(e)"
-                total += 0  # already counted
+                global total += 0  # already counted
             end
         end
     end

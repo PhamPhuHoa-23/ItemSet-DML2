@@ -17,21 +17,23 @@ function lcmfreq_base(transactions::Vector{Vector{Int}}, minsup_abs::Int)::LCMFr
     result = FreqItemset[]
     isempty(transactions) && return LCMFreqResult(result)
 
+    # Item IDs are not guaranteed to start at 1 (e.g. Pumsb starts at 0), so
+    # buckets is indexed by item + 1 to stay within Julia's 1-based arrays.
     max_item = maximum(maximum(tx) for tx in transactions if !isempty(tx))
     buckets  = [Int[] for _ in 1:(max_item + 1)]
     for (tid, tx) in enumerate(transactions)
         for item in tx
-            push!(buckets[item], tid)
+            push!(buckets[item + 1], tid)
         end
     end
 
     clean_transactions = Vector{Vector{Int}}(undef, length(transactions))
     for (tid, tx) in enumerate(transactions)
-        clean_transactions[tid] = filter(item -> length(buckets[item]) >= minsup_abs, tx)
+        clean_transactions[tid] = filter(item -> length(buckets[item + 1]) >= minsup_abs, tx)
     end
 
-    all_freq_items = sort([item for item in 1:max_item
-                           if length(buckets[item]) >= minsup_abs])
+    all_freq_items = sort([item for item in 0:max_item
+                           if length(buckets[item + 1]) >= minsup_abs])
 
     p_items = zeros(Int, 500)
     _hypercube_base!(p_items, 0,
