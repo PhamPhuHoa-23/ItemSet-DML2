@@ -43,14 +43,31 @@
 \setbeamercolor{block body alerted}{bg=accent!6}
 \setbeamercolor{palette primary}{bg=deepblue}
 \setbeamerfont{title}{size=\Large,series=\bfseries}
+\setbeamerfont{subtitle}{size=\small}
+\setbeamerfont{author}{size=\small}
+\setbeamerfont{institute}{size=\footnotesize}
+\setbeamerfont{date}{size=\footnotesize}
 \setbeamerfont{frametitle}{size=\normalsize,series=\bfseries}
 \metroset{sectionpage=progressbar}
+\setbeamertemplate{title page}{%
+  \vspace*{0.7cm}
+  {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+  \vspace{0.35cm}
+  {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+  \vspace{0.55cm}
+  {\usebeamerfont{author}\insertauthor\par}
+  \vspace{0.2cm}
+  {\usebeamerfont{institute}\insertinstitute\par}
+  \vspace{0.2cm}
+  {\usebeamerfont{date}\insertdate\par}
+}
 
 % ---- Macros ----------------------------------------------------------
 \newcommand{\hl}[1]{\textcolor{accent}{\textbf{#1}}}
 \newcommand{\key}[1]{\textcolor{deepblue}{\textbf{#1}}}
 \newcommand{\tc}[1]{\textcolor{teal}{#1}}
 \newcommand{\opt}[1]{\textcolor{optgreen}{\textbf{#1}}}
+\newcommand{\tikzmark}[1]{\tikz[remember picture,overlay,baseline]\coordinate (#1);}
 
 % ---- Listings --------------------------------------------------------
 \lstdefinelanguage{JuliaLite}{
@@ -66,6 +83,7 @@
   commentstyle=\color{black!50},
   stringstyle=\color{teal},
   columns=fullflexible,
+  escapeinside={(*@}{@*)},
   keepspaces=true,
   showstringspaces=false,
   frame=single,
@@ -104,7 +122,7 @@
 
 \begin{frame}{Nội dung trình bày}
   \setbeamertemplate{section in toc}[sections numbered]
-  \tableofcontents[hideallsubsections]
+  {\scriptsize\tableofcontents[hideallsubsections]}
 \end{frame}
 
 % ===================================================================
@@ -244,6 +262,7 @@ BackTracking(P):
 
 \begin{frame}{Ba kỹ thuật của LCMFreq trên khung Backtracking}
   \centering
+  \resizebox{0.92\linewidth}{!}{%
   \begin{tikzpicture}[font=\footnotesize, node distance=0.5cm]
     \node[box=deepblue,minimum width=2.2cm] (p) at (0,0) {$P$};
     \node<2->[boxt={teal}{teal!12},minimum width=2.6cm,right=1.4cm of p] (bucket)
@@ -256,10 +275,10 @@ BackTracking(P):
     \draw<2->[arrow=teal] (p) -- node[above]{\scriptsize Occ.Deliver} (bucket);
     \draw<3->[arrow=skyblue] (bucket) -- node[above]{\scriptsize cùng support} (h);
     \draw<4->[arrow=optgreen] (h) -- node[above]{\scriptsize Hypercube} (out);
-  \end{tikzpicture}
+  \end{tikzpicture}}
 
-  \vspace{0.6em}
-  \begin{itemize}
+  \vspace{0.05em}
+  \begin{itemize}\setlength\itemsep{0.15em}
     \item \key{1. Backtracking}: prefix $P$, chỉ thêm $e>\mathrm{tail}(P)$.
     \item<2-> \tc{2. OccurrenceDeliver}: duyệt $\mathcal T(P)$ một lần, rải vào bucket
       của mọi candidate cùng lúc.
@@ -273,10 +292,10 @@ BackTracking(P):
 % ===================================================================
 
 \begin{frame}{Down project: giao hai danh sách TID bằng hai con trỏ}
-  \[
+  \begin{equation}
     \mathcal T(P_1\cup P_2)=\mathcal T(P_1)\cap\mathcal T(P_2)
     \quad\text{tính trong } O(|\mathcal T(P_1)|+|\mathcal T(P_2)|)
-  \]
+  \end{equation}
   \centering
   \begin{tikzpicture}[font=\small]
     % T1 row
@@ -291,17 +310,17 @@ BackTracking(P):
     }
     % output row placeholder
     \node[font=\scriptsize\bfseries] at (-1.0,-1.85) {Giao};
-    \node<2->[bucket,minimum width=1.6cm] (o3) at (1.35,-1.85) {3};
-    \node<3->[bucket,minimum width=1.6cm] (o5) at (2.7,-1.85) {5};
-    \node<5->[bucket,minimum width=1.6cm] (o9) at (5.4,-1.85) {9};
+    \node<2->[bucket,minimum width=1.05cm] (o3) at (1.10,-1.85) {3};
+    \node<3->[bucket,minimum width=1.05cm] (o5) at (2.75,-1.85) {5};
+    \node<5->[bucket,minimum width=1.05cm] (o9) at (4.40,-1.85) {9};
 
     % pointers i,j: exact-slide so each step shows only current position
-    \node<1>[ptr] at (0,1.05) {$\blacktriangle$}; \node<1>[ptr] at (0,-0.9) {$\blacktriangledown$};
-    \node<2>[ptr] at (1.35,1.05) {$\blacktriangle$}; \node<2>[ptr] at (0,-0.9) {$\blacktriangledown$};
-    \node<3>[ptr] at (2.7,1.05) {$\blacktriangle$}; \node<3>[ptr] at (1.35,-0.9) {$\blacktriangledown$};
-    \node<4>[ptr] at (4.05,1.05) {$\blacktriangle$}; \node<4>[ptr] at (2.7,-0.9) {$\blacktriangledown$};
-    \node<5>[ptr] at (4.05,1.05) {$\blacktriangle$}; \node<5>[ptr] at (4.05,-0.9) {$\blacktriangledown$};
-    \node<6>[ptr] at (5.4,1.05) {$\blacktriangle$}; \node<6>[ptr] at (4.05,-0.9) {$\blacktriangledown$};
+    \node<1>[ptr] at (0,0.82) {$\blacktriangle$}; \node<1>[ptr] at (0,-1.12) {$\blacktriangledown$};
+    \node<2>[ptr] at (1.35,0.82) {$\blacktriangle$}; \node<2>[ptr] at (0,-1.12) {$\blacktriangledown$};
+    \node<3>[ptr] at (2.7,0.82) {$\blacktriangle$}; \node<3>[ptr] at (1.35,-1.12) {$\blacktriangledown$};
+    \node<4>[ptr] at (4.05,0.82) {$\blacktriangle$}; \node<4>[ptr] at (2.7,-1.12) {$\blacktriangledown$};
+    \node<5>[ptr] at (4.05,0.82) {$\blacktriangle$}; \node<5>[ptr] at (4.05,-1.12) {$\blacktriangledown$};
+    \node<6>[ptr] at (5.4,0.82) {$\blacktriangle$}; \node<6>[ptr] at (4.05,-1.12) {$\blacktriangledown$};
   \end{tikzpicture}
 
   \vspace{0.4em}
@@ -321,11 +340,11 @@ BackTracking(P):
 \begin{frame}{Vấn đề khi áp dụng down project cho Backtracking}
   Backtracking luôn thêm \emph{đúng một item} mỗi lượt $\Rightarrow$ cặp tách
   duy nhất khả dụng là $P_1=P$, $P_2=\{e\}$. Với $k$ candidate $e>\mathrm{tail}(P)$:
-  \[
+  \begin{equation}
     O\!\left(\sum_{e>\mathrm{tail}(P)} \bigl(|\mathcal T(P)|+|\mathcal T(\{e\})|\bigr)\right)
-  \]
+  \end{equation}
   \centering
-  \begin{tikzpicture}[font=\scriptsize]
+  \begin{tikzpicture}[font=\scriptsize,scale=0.82,transform shape]
     \foreach \name/\x/\h/\col in {B/0/1.6/skyblue, C/1.6/1.4/teal, D/3.2/1.2/accent} {
       \draw[fill=\col!20,draw=\col] (\x,0) rectangle (\x+1.2,\h);
       \node at (\x+0.6,\h+0.25) {$|T(P)|{+}|T(\{\name\})|$};
@@ -351,9 +370,10 @@ OccurrenceDeliver(D, P):
           insert t into Bucket[e]
   # Bucket[e] = T(P union {e})
 \end{lstlisting}
-      \small\[
+      \small
+      \begin{equation}
         O\!\Bigl(|\mathcal T(P)|+\!\!\sum_{e>\mathrm{tail}(P)}\!\!|\mathcal T(P\cup\{e\})|\Bigr)
-      \]
+      \end{equation}
     \end{column}
     \begin{column}{0.55\textwidth}
       \centering
@@ -383,11 +403,11 @@ OccurrenceDeliver(D, P):
 
 \begin{frame}{Bất biến sau khi deliver}
   \begin{block}{Bất biến cần nhớ}
-    \[
+    \begin{equation}
       \mathrm{Bucket}[e]=\{t\in\mathcal T(P): e\in t\}=\mathcal T(P\cup\{e\})
       \quad\Rightarrow\quad
       \mathrm{sup}(P\cup\{e\})=|\mathrm{Bucket}[e]|
-    \]
+    \end{equation}
   \end{block}
   \small Bucket \emph{là} denotation của $P\cup\{e\}$ — dùng được ngay cho:
   kiểm tra minsup, đệ quy tiếp, và (slide sau) phát hiện item miễn phí trong
@@ -407,20 +427,34 @@ OccurrenceDeliver(D, P):
 \section{HypercubeDecomposition}
 % ===================================================================
 
-\begin{frame}{$H(P)$: item miễn phí và xuất theo lô}
+\begin{frame}[fragile]{$H(P)$: item miễn phí và xuất theo lô}
   \begin{block}{Định nghĩa (Uno et al., 2004, Mục 3.3)}
     \small $H(P)=\{e>\mathrm{tail}(P): \mathcal T(P)=\mathcal T(P\cup\{e\})\}$.
     Kiểm tra $e\in H(P)$ chỉ cần so độ dài: $|\mathrm{Bucket}[e]|=|\mathcal T(P)|$
     — \emph{đã có sẵn} sau OccurrenceDeliver.
   \end{block}
 
-  \centering
-  \begin{tikzpicture}[font=\scriptsize, node distance=0.5cm]
-    \node[box=deepblue,minimum width=2.4cm] (p) {$P$, $S'=S\cup H(P)$};
-    \node<2->[box=optgreen,minimum width=5.6cm,below=0.7cm of p]
-      {Với mọi $Q\subseteq S'$: $P\cup Q$ frequent, $\mathrm{sup}=\mathrm{sup}(P)$\\
-       $\Rightarrow$ xuất $2^{|S'|}$ itemset trong \textbf{một} lượt};
-  \end{tikzpicture}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.46\textwidth}
+\begin{lstlisting}
+H = filter(e ->
+    length(Bucket[e]) == support_P,
+    F)
+S_prime = S union H
+for Q subset of S_prime:
+    output P union Q with support_P
+\end{lstlisting}
+    \end{column}
+    \begin{column}{0.50\textwidth}
+      \centering
+      \begin{tikzpicture}[font=\scriptsize, node distance=0.5cm]
+        \node[box=deepblue,minimum width=2.4cm] (p) {$P$, $S'=S\cup H(P)$};
+        \node<2->[box=optgreen,minimum width=4.6cm,below=0.7cm of p]
+          {Với mọi $Q\subseteq S'$: $P\cup Q$ frequent\\
+           $\Rightarrow$ xuất $2^{|S'|}$ itemset trong \textbf{một} lượt};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
 
   \vspace{0.4em}
   \onslide<3->{\centering\small\textit{``This saves about $2^{|H(P)|}$ times
@@ -454,22 +488,41 @@ OccurrenceDeliver(D, P):
     \begin{column}{0.62\textwidth}
 \begin{lstlisting}
 LCMFreqBase(P, tids_P, F, S):
-    support_P = length(tids_P)
+(*@\tikzmark{lcmODstart}@*)    support_P = length(tids_P)
     Bucket[e] = [] for each e in F
     for tid in tids_P:                  # OccDeliver
         for item in transaction[tid]:
             if item in F:
-                push tid into Bucket[item]
+                push tid into Bucket[item](*@\tikzmark{lcmODend}@*)
 
-    H = {e in F : length(Bucket[e]) == support_P}
-    S_prime = S union H                  # Hypercube
-    for Q subset of S_prime:
-        output P union Q with support_P
+(*@\tikzmark{lcmHstart}@*)    H = {e in F : length(Bucket[e]) == support_P}
+    S_prime = S union H                  # Hypercube(*@\tikzmark{lcmHend}@*)
 
-    for e in F, e > tail(P), e not in S_prime:
+(*@\tikzmark{lcmOUTstart}@*)    for Q subset of S_prime:
+        output P union Q with support_P(*@\tikzmark{lcmOUTend}@*)
+
+(*@\tikzmark{lcmRECstart}@*)    for e in F, e > tail(P), e not in S_prime:
         if length(Bucket[e]) >= minsup:
-            LCMFreqBase(P+{e}, Bucket[e], F_next, S_prime)
+            LCMFreqBase(P+{e}, Bucket[e], F_next, S_prime)(*@\tikzmark{lcmRECend}@*)
 \end{lstlisting}
+      \begin{tikzpicture}[remember picture,overlay]
+        \coordinate (lcmODright) at ($(lcmODstart)+(0.97\linewidth,0)$);
+        \coordinate (lcmODbottom) at ($(lcmODend)+(0,-0.45ex)$);
+        \coordinate (lcmHright) at ($(lcmHstart)+(0.97\linewidth,0)$);
+        \coordinate (lcmHbottom) at ($(lcmHend)+(0,-0.45ex)$);
+        \coordinate (lcmOUTright) at ($(lcmOUTstart)+(0.97\linewidth,0)$);
+        \coordinate (lcmOUTbottom) at ($(lcmOUTend)+(0,-0.45ex)$);
+        \coordinate (lcmRECright) at ($(lcmRECstart)+(0.97\linewidth,0)$);
+        \coordinate (lcmRECbottom) at ($(lcmRECend)+(0,-0.45ex)$);
+        \draw<1->[rounded corners=2pt,draw=teal,line width=0.9pt]
+          ($(lcmODstart)+(-0.45em,1.15ex)$) rectangle (lcmODright |- lcmODbottom);
+        \draw<2->[rounded corners=2pt,draw=skyblue,line width=0.9pt]
+          ($(lcmHstart)+(-0.45em,1.15ex)$) rectangle (lcmHright |- lcmHbottom);
+        \draw<3->[rounded corners=2pt,draw=optgreen,line width=0.9pt]
+          ($(lcmOUTstart)+(-0.45em,1.15ex)$) rectangle (lcmOUTright |- lcmOUTbottom);
+        \draw<4->[rounded corners=2pt,draw=accent,line width=0.9pt]
+          ($(lcmRECstart)+(-0.45em,1.15ex)$) rectangle (lcmRECright |- lcmRECbottom);
+      \end{tikzpicture}
     \end{column}
     \begin{column}{0.34\textwidth}
       \small\textbf{Nhịp chạy tại node $P$}:
@@ -514,7 +567,7 @@ LCMFreqBase(P, tids_P, F, S):
 
 \begin{frame}{Cây đệ quy trên ví dụ (theo đúng thứ tự DFS)}
   \centering
-  \resizebox{0.98\linewidth}{!}{%
+  \resizebox{0.78\linewidth}{!}{%
   \begin{tikzpicture}[font=\scriptsize]
     \node[box=deepblue,minimum width=3.2cm] (root) at (0,0)
       {$P=\emptyset$, sup=5\\\opt{$\{B\}{:}5$}};
@@ -545,7 +598,7 @@ LCMFreqBase(P, tids_P, F, S):
     \draw<8->[arrow=deepblue] (root) -- node[above right]{$D$} (D);
   \end{tikzpicture}}
 
-  \vspace{0.15em}
+  \vspace{0.05em}
   \onslide<8->{\footnotesize\color{black!55} Chỉ 7 node thật sự
   ($\emptyset,A,C,D,AC,AD,CD,ACD$); 8 itemset chứa $B$ được xuất kèm bằng
   Hypercube, không tốn nhánh đệ quy riêng.}
@@ -664,10 +717,10 @@ end
 \end{frame}
 
 \begin{frame}{Độ phức tạp và yếu tố ảnh hưởng}
-  \[
+  \begin{equation}
     \text{Chi phí node } P:\quad O\!\Bigl(\sum_{T\in\mathcal T(P)} |T\cap F|\Bigr)
     \qquad\text{(không duyệt lại như down project)}
-  \]
+  \end{equation}
   LCMFreq là \hl{output-sensitive}: thời gian gắn với số kết quả phải xuất.
   \vspace{0.3em}
   \centering\small
@@ -786,10 +839,10 @@ end
 
 \begin{frame}{Sinh luật kết hợp từ kết quả LCMFreq}
   Với itemset $X$ frequent, $Y\subset X$:
-  \[
+  \begin{equation}
     \mathrm{conf}(Y\Rightarrow X\setminus Y)=\frac{\mathrm{sup}(X)}{\mathrm{sup}(Y)}\geq\text{minconf},
     \qquad \mathrm{lift}>1 \Rightarrow \text{đồng xuất hiện nhiều hơn ngẫu nhiên}.
-  \]
+  \end{equation}
   \small Retail (88\,162 giao dịch): minsup$=0.5\%$ ($\sigma=441$) $\to$ 580
   frequent itemset; minconf$=60\%$ $\to$ 312 association rule.
 

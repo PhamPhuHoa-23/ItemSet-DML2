@@ -58,10 +58,6 @@ docs/LaTeX/*.xdy
 
 # ── Slide deck: keep only source, exported PDF, and the speaking script ──
 slide/*
-!slide/
-!slide/*.tex
-!slide/*.pdf
-!slide/*.md
 
 # ── SPMF / Java temp artifacts ────────────────────────────────────────────
 -
